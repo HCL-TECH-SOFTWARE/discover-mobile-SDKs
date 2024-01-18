@@ -8,7 +8,7 @@ export default function App() {
   const [imageData, setImageData] = React.useState('data:image/png;base64,');
 
   React.useEffect(() => {
-    multiply(7, 11.21).then(setResult);
+    multiply(55.2, 22).then(setResult);
     
     clickclick(1.0, 1.0).then( (base64Image) => {
       setImageData(`data:image/png;base64,${base64Image}`);

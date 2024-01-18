@@ -51,8 +51,8 @@ var hclDiscoverLib = (function () {
       var _paused = false;
       var _postMessageUrl = 'http://192.168.86.23:3001/listener'; // 'http://185.64.247.121/DiscoverUIPost.php';
       var _killSwitchUrl = 'http://localhost:3001/killOrLive';
-      var _regexList = [];
-      var _screens = {};
+      var _regexList:any[] = [];
+      var _screens:{ [key: string]: any[] } = {};
       var _currentScreenName = '';
       var _defaultScreen = {
           pause: false,
@@ -68,9 +68,24 @@ var hclDiscoverLib = (function () {
       var _userAgent = '';
       var _fingerPrint = '';
       /* messages array */
-      var _messages = [];
+      var _messages:any[] = [];
   
-      var _hclDiscoverLib = {};
+      var _hclDiscoverLib = { 
+                                debugFlag:true, 
+                                debugLog:(..._args: any[])=>{},
+                                start:(_options:{postMessageUrl:any, killSwitchUrl:any, regexList:any, screens:{ [key: string]: any[] }}) => {},
+                                stop:()=>{},
+                                pause:()=>{},
+                                resume:()=>{},
+                                printSessionId:()=>{},
+                                getSessionId:()=>{},
+                                logAppContext:(_screenName:string, _referrerScreenName:string) => {},
+                                logConnection:(_connectionData: {})=>{},
+                                logTextChange:(_newValue: string, _targetId: string)=>{},
+                                logEvent:(_evt: {})=>{},
+                                logException:(_exceptionData: {})=>{},
+                                logTouch:(_evt: any)=>{},
+                            };
   
       /* public variables */
       _hclDiscoverLib.debugFlag = true;
@@ -82,12 +97,12 @@ var hclDiscoverLib = (function () {
               // console.log(...args);
           }
       }
-      _hclDiscoverLib.start = async (options:{}) => {
+      _hclDiscoverLib.start = async (options:{postMessageUrl:any, killSwitchUrl:any, regexList:any, screens:{ [key: string]: any[] }}) => {
           return new Promise( async (resolve, reject) => {
                   if( _sessionId.length > 0){
                       _hclDiscoverLib.stop();
                   }
-                  generateSessionId().then( async (value) => {
+                  generateSessionId().then( async (value:any) => {
                       /* init */
                       _postMessageUrl = (options && options.postMessageUrl) ? options.postMessageUrl : _postMessageUrl;
                       _killSwitchUrl = (options && options.killSwitchUrl) ? options.killSwitchUrl : _killSwitchUrl;
@@ -108,21 +123,26 @@ var hclDiscoverLib = (function () {
                       if( Platform.OS === 'android'){
                           _fingerPrint.length ? _fingerPrint : DeviceInfo.getFingerprint().then( async (promiseVal) => {_fingerPrint = promiseVal});
                       }
-                      resolve(value);
+                      if( value ){
+                        resolve( value );
+                      }
+                      else{
+                        reject( value );
+                      }
                   }
               );
           });
       }
       _hclDiscoverLib.stop = async () => {
           if( _messages.length > 0 ){
-              flushQueue([..._messages]).then( resolve => {}, reject => {});
+              flushQueue([..._messages]).then( /*resolve => {}, reject => {} */);
           }
           _sessionId = '';
           _messages = [];
       }
       _hclDiscoverLib.pause = async () => {
           if( _messages.length > 0 ){
-              flushQueue([..._messages]).then( resolve => {}, reject => {});
+              flushQueue([..._messages]).then( /* resolve => {}, reject => {} */);
           }
           _messages = [];
           _paused = true;
@@ -145,7 +165,7 @@ var hclDiscoverLib = (function () {
                   reject(false);
               }
               _currentScreenName = screenName;
-              var currentScreenConfigs = _defaultScreen;
+              var currentScreenConfigs:any = _defaultScreen;
               if( _screens && _screens[_currentScreenName] ){
                   currentScreenConfigs = _screens[_currentScreenName];
               }
@@ -163,13 +183,14 @@ var hclDiscoverLib = (function () {
                           paused:true
                       },
                       image:{
-                          base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : ''
+                          /* base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : '' */
+                          base64Image: ''
                       }
                   });
                   captureClientState().then((clientStateMessage) => {
                       _messages.push(clientStateMessage);
                   });
-                  resolve(true);
+                  resolve();
                   await _hclDiscoverLib.pause(); /* pause will flush */
                   _messages = []; /* we flushed and paused, reset queue */
               }else if( (_paused == true) && (currentScreenConfigs.pause == false)){
@@ -180,7 +201,7 @@ var hclDiscoverLib = (function () {
                   _hclDiscoverLib.debugLog('Discover is not paused, logging new screen.');
                   /** New Screen */
                   if( _messages.length > 0 ){
-                      flushQueue([..._messages]).then( resolve => {}, reject => {});
+                      flushQueue([..._messages]).then( /* resolve => {}, reject => {} */);
                   }
                   _messages = [];
                   _screenViewLoadTime = Date.now();
@@ -210,7 +231,7 @@ var hclDiscoverLib = (function () {
                           captureClientState().then((clientStateMessage) => {
                               _messages.push(clientStateMessage);
                           });
-                          resolve(true);
+                          resolve();
                       });                    
                   },500)
   
@@ -234,7 +255,7 @@ var hclDiscoverLib = (function () {
                   screenviewOffset: screenviewOffset(),
                   connection: connectionData ? connectionData : {}
               });
-              resolve(true);
+              resolve();
           });
       }
       /* type 4 : textChange */
@@ -267,7 +288,7 @@ var hclDiscoverLib = (function () {
                   }
                   
                   _hclDiscoverLib.debugLog('Type 4 : Text Change " ' +  textValue + ' " on target " ' + targetId + ' " ');
-                  var currentScreenConfigs = _defaultScreen;
+                  var currentScreenConfigs:any = _defaultScreen;
                   if( _screens && _screens[_currentScreenName] ){
                       currentScreenConfigs = _screens[_currentScreenName];
                   }
@@ -299,7 +320,7 @@ var hclDiscoverLib = (function () {
                               base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : ''
                           }
                       });
-                      resolve(true);
+                      resolve();
                   });
               }
           });
@@ -321,7 +342,7 @@ var hclDiscoverLib = (function () {
                   screenviewOffset: screenviewOffset(),
                   customEvent: evt ? evt : {name:'Default Custom Event', data:{}}
               });
-              resolve(true);
+              resolve();
           });
       }
       /* type 6 : exception */
@@ -341,7 +362,7 @@ var hclDiscoverLib = (function () {
                   screenviewOffset: screenviewOffset(),
                   exception: exceptionData ? exceptionData : {}
               });
-              resolve(true);
+              resolve();
           });
           }
       /* type 11 : gesture */
@@ -392,7 +413,7 @@ var hclDiscoverLib = (function () {
                               base64Image:'',
                           }
                       }
-                      var currentScreenConfigs = _defaultScreen;
+                      var currentScreenConfigs:any = _defaultScreen;
                       if( _screens && _screens[_currentScreenName] ){
                           currentScreenConfigs = _screens[_currentScreenName];
                       }
@@ -405,9 +426,9 @@ var hclDiscoverLib = (function () {
                           }
                       }
                       clickclick(1.0, blurLevel).then( (base64Image) => {
-                              touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : '';
+                              touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? String(base64Image) : '';
                               _messages.push(touchEvtMessage);
-                              resolve(true);
+                              resolve();
                       });
                   }
           });
@@ -429,21 +450,33 @@ var hclDiscoverLib = (function () {
               var dateTimeStr = _sessionStartTime.toString();
               sha256(deviceIdStr+dateTimeStr).then( hash => {
                   _sessionId = hash.toUpperCase();
-                  _serialNumber = 1;
-                  _hclDiscoverLib.debugLog('generated sessionId is :', _sessionId);
-                  resolve( _sessionId );
+                  if( _sessionId ){
+                    _serialNumber = 1;
+                    _hclDiscoverLib.debugLog('generated sessionId is :', _sessionId);
+                    resolve( _sessionId );
+                  }
+                  else{
+                    reject( _sessionId );
+                  }
               })
           });
       }
       /* type 1 */
       const captureClientState = async () => {
-          return new Promise( async (resolve, reject) => {
+          return new Promise( async (resolve /*, reject*/) => {
               var clientStateMessage = {
                   type: 1,
                   offset: offset(),
                   screenviewOffset: screenviewOffset(),
                   mobileState:{
                       orientation:( Dimensions.get('window').width > Dimensions.get('window').height ) ? 90 : 0,
+                      freeStorage:0,
+                      battery:0,
+                      freeMemory:0,
+                      connectionType:'Unknown',
+                      networkReachability:'Unknown',
+                      ip:'0.0.0.0',
+                      carrier:'',
                   }
               };
               DeviceInfo.getFreeDiskStorage().then((freeStorage) => {
@@ -465,7 +498,7 @@ var hclDiscoverLib = (function () {
           });
       }
       /* post to discover */
-      const flushQueue = async (payload) => {
+      const flushQueue = async (payload:any) => {
           return new Promise( async (resolve, reject) => {
           /* check if there is connection before posting */
               if( _sessionId == undefined || _sessionId.length <= 0 ){
@@ -506,15 +539,15 @@ var hclDiscoverLib = (function () {
                           osVersion: DeviceInfo.getSystemVersion()
                       };
               
-                  const requestHeaders = {
-                          "Content-Type": "application/json",
-                          "User-Agent": _userAgent,
-                          "X_DISCOVER_HASUICDATA": false,
-                          "X_DISCOVER": ( Platform.OS === 'ios' ) ? 'device (iOS) Lib/1.0.0' : 'device (android) Lib/1.0.0',
-                          "X_TEALEAF_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
-                          "TlNativeReplay": true,
-                          "TLTSID": _sessionId,
-                      };
+                  const requestHeaders:Headers = new Headers();
+                  requestHeaders.set('Content-Type', 'application/json');
+                  requestHeaders.set('User-Agent', _userAgent);
+                  requestHeaders.set('X_DISCOVER_HASUICDATA', 'false');
+                  requestHeaders.set('X_DISCOVER', ( Platform.OS === 'ios' ) ? 'device (iOS) Lib/1.0.0' : 'device (android) Lib/1.0.0');
+                  requestHeaders.set('X_TEALEAF_PROPERTY', `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`);
+                  requestHeaders.set('TlNativeReplay', 'true');
+                  requestHeaders.set('TLTSID', _sessionId);
+
                   try {
                           var stringyfiedBody = JSON.stringify(requestBody);//JSON.stringify(requestBody, undefined, 2);
                           _hclDiscoverLib.debugLog('Posting to : ', url);
@@ -552,19 +585,19 @@ var hclDiscoverLib = (function () {
       return _hclDiscoverLib;
   })();
 
-const HCLDiscoverReactNativeContainer = (props) => {
-    const { children, captureKeyboardEvents } = props;
+const HCLDiscoverReactNativeContainer = (props:any) => {
+    const { children /*, captureKeyboardEvents */ } = props;
     const navigation = children.ref;
     const currentRoute = useRef();
     const initial = useRef(false);
     var discoverTextTracker = '';
     var discoverTextTargetTracker = '';
 
-    const deviceKeyPressHandler = (evt, bubbledEvent) => {
+    const deviceKeyPressHandler = (evt:any, bubbledEvent:any) => {
         if(evt == null){
             if( discoverTextTracker != '' ){
                 //console.log('Type 4 : Text Change " ' +  discoverTextTracker + ' " on target " ' + discoverTextTargetTracker + ' " ');
-                hclDiscoverLibInstance.logTextChange( discoverTextTracker, discoverTextTargetTracker ).then( resolve => {}, reject => {});
+                hclDiscoverRN.logTextChange( discoverTextTracker, discoverTextTargetTracker ); /*.then( resolve => {}, reject => {});*/
             }
         }
         if( bubbledEvent == 'DiscoverTextChangeCompleteEvent' ){
@@ -631,13 +664,15 @@ const HCLDiscoverReactNativeContainer = (props) => {
                 // HCLDiscoverReactNativeBridge.logScreenLayout(currentRoute.current);
             }
             //console.log(`Type 2 : Screen Change : From ${previousRouteName} to ${currentRoute.current}`);
-            hclDiscoverLibInstance.logAppContext( currentRoute.current, previousRouteName ).then( resolve => {}, reject => {});
+            hclDiscoverRN.logAppContext( String(currentRoute.current), String(previousRouteName) )/*.then( resolve => {}, reject => {} )*/;
         });
         
+        /* 
         const unsubscribeOptions = navigation.current.addListener('options', (e) => {
             // You can get the new options for the currently focused screen
             console.log(e.data.options);
           });
+        */
 
         return unsubscribe;
     }, [navigation]);
@@ -718,9 +753,9 @@ const HCLDiscoverReactNativeContainer = (props) => {
                 },
             }
         };
-        hclDiscoverLibInstance.start( options ).then( (value) => {
+        hclDiscoverRN.start( options ).then( (value) => {
             console.debug('the session value is', value);
-            hclDiscoverLibInstance.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
+            hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
         });
     })
 
@@ -739,9 +774,9 @@ const HCLDiscoverReactNativeContainer = (props) => {
         
         //console.log( 'captured event : ' + util.inspect(baseEvent, {showHidden: false, depth: null}) + ' on target : ' + event.nativeEvent.target );
         //console.log( 'Type 11 : Touch : event pageX, PageY, x, y : ' + event.nativeEvent.pageX + ', ' + event.nativeEvent.pageY + ', ' + event.nativeEvent.locationX + ', ' + event.nativeEvent.locationY + ' on target : ' + event.nativeEvent.target + ' event timeStamp : ' + event.timeStamp );
-        hclDiscoverLibInstance.debugFlag = true;
-        hclDiscoverLibInstance.printSessionId();
-        hclDiscoverLibInstance.logTouch(event).then( resolve => {}, reject => {});
+        hclDiscoverRN.debugFlag = true;
+        hclDiscoverRN.printSessionId();
+        hclDiscoverRN.logTouch(event).then( /* resolve => {}, reject => {} */);
 
         // Following gives us the right element type to track for example RCTSinglelineTextInputView or AndroidTextInput
         // Which is the info we need to use to enable text change tracking instead of keyboardshow and hide

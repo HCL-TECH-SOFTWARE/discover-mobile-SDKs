@@ -1,6 +1,6 @@
 {
   "name": "react-native-hcl-discover",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Discover SDK for HCL Software",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -44,7 +44,7 @@
     "url": "git+https://github.com/HCL-TECH-SOFTWARE/discover-mobile-SDKs.git"
   },
   "author": "Shridhar Damale <shridharyasha.damal@hcl.com> (https://github.com/HCL-TECH-SOFTWARE)",
-  "license": "MIT",
+  "license": "Apache License Version 2.0",
   "bugs": {
     "url": "https://github.com/HCL-TECH-SOFTWARE/discover-mobile-SDKs/issues"
   },

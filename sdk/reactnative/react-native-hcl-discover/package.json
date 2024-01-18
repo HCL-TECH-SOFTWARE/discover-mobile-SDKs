@@ -1,6 +1,6 @@
 {
   "name": "react-native-hcl-discover",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Discover SDK for HCL Software",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -161,5 +161,9 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "react-native-device-info": "^10.12.0",
+    "react-native-sha256": "^1.4.9"
   }
 }

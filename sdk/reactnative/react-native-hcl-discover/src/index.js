@@ -83,11 +83,13 @@ var hclDiscoverLib = (function () {
           }
       }
       _hclDiscoverLib.start = async (options:{}) => {
-          return new Promise( async (resolve, reject) => {
+            _hclDiscoverLib.debugLog('start invoked with : ', options);
+            return new Promise( async (resolve, reject) => {
                   if( _sessionId.length > 0){
                       _hclDiscoverLib.stop();
                   }
                   generateSessionId().then( async (value) => {
+                      _hclDiscoverLib.debugLog('generated session id, initializing configurations ');
                       /* init */
                       _postMessageUrl = (options && options.postMessageUrl) ? options.postMessageUrl : _postMessageUrl;
                       _killSwitchUrl = (options && options.killSwitchUrl) ? options.killSwitchUrl : _killSwitchUrl;
@@ -176,7 +178,7 @@ var hclDiscoverLib = (function () {
                   _hclDiscoverLib.debugLog('Discover was paused, resuming');
                   await _hclDiscoverLib.resume(); /** if already paused and if current configs */
               }
-              if(_paused == false){
+              if( (_sessionId != undefined) && (_sessionId.length > 0)  && (_paused == false) ){
                   _hclDiscoverLib.debugLog('Discover is not paused, logging new screen.');
                   /** New Screen */
                   if( _messages.length > 0 ){
@@ -422,8 +424,10 @@ var hclDiscoverLib = (function () {
       }
       /* generate new session Id */
       const generateSessionId = async () => {
-          return new Promise( async (resolve, reject) => {
+            _hclDiscoverLib.debugLog('generateSessionId invoked');
+            return new Promise( async (resolve, reject) => {
               var deviceIdStr = DeviceInfo.getDeviceId();
+              _hclDiscoverLib.debugLog('deviceIdStr is', deviceIdStr);
               _sessionStartTime = Date.now();
               _screenViewLoadTime = _sessionStartTime;
               var dateTimeStr = _sessionStartTime.toString();
@@ -552,7 +556,7 @@ var hclDiscoverLib = (function () {
       return _hclDiscoverLib;
   })();
 
-const HCLDiscoverReactNativeContainer = (props) => {
+export const HCLDiscoverReactNativeContainer = (props) => {
     const { children, captureKeyboardEvents } = props;
     const navigation = children.ref;
     const currentRoute = useRef();
@@ -663,66 +667,66 @@ const HCLDiscoverReactNativeContainer = (props) => {
         console.log('.....')
     },[])
 
-    useEffect(() =>{
-        /* Initializer */
-        var options = {
-            postMessageUrl: 'http://192.168.86.53:3001/listener', 
-            //postMessageUrl: 'http://185.64.247.121/DiscoverUIPost.php', 
-            //postMessageUrl: 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
-            killSwitchUrl:'http://localhost:3001/killOrLive',
-            regexList:[
-                {   regex: /(?:\d{4}[ -]?){4}/gm,
-                    replace:'**** **** **** ****',
-                    name: 'visa card'
-                },
-                {   regex: /^\d{3}-?\d{2}-?\d{4}$/,
-                    replace:'*** ** ****',
-                    name: 'ssn'
-                },
-                {
-                    regex: /^(?:[Pp][Oo]\s[Bb][Oo][Xx]|[0-9]+)\s(?:[0-9A-Za-z\.'#]|[^\S\r\n])+/,
-                    replace: 'xx xxx xx',
-                    name: 'address line 1'
-                },
-                {
-                    regex: /^\s*\S+(?:\s+\S+){2}/,
-                    replace: 'xx xxx',
-                    name: 'address line 1, 2'
-                },
-                {
-                    regex: /([a-zA-Z]+(?:\s+[a-zA-Z]+)?)\s+(\d{5}(?:[\-]\d{4})?)/,
-                    replace: 'xxxx xx xxxxx',
-                    name: 'city, state, zip'
-                },
-                {
-                    regex: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-                    replace: 'xx@xx.xxx',
-                    name: 'email'
-                },
-            ],
-            screens:{
-                'Home':{
-                    pause: false,
-                    takeScreenShot: true,
-                    blurScreenShot: 0,
-                },
-                'LoanDetails':{
-                    pause: false,
-                    takeScreenShot: true,
-                    blurScreenShot: 5,
-                },
-                'Settings':{
-                    pause: false,
-                    takeScreenShot: true,
-                    blurScreenShot: 0,
-                },
-            }
-        };
-        hclDiscoverRN.start( options ).then( (value) => {
-            console.debug('the session value is', value);
-            hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
-        });
-    })
+    // useEffect(() =>{
+    //     /* Initializer */
+    //     var options = {
+    //         postMessageUrl: 'http://192.168.86.53:3001/listener', 
+    //         //postMessageUrl: 'http://185.64.247.121/DiscoverUIPost.php', 
+    //         //postMessageUrl: 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
+    //         killSwitchUrl:'http://localhost:3001/killOrLive',
+    //         regexList:[
+    //             {   regex: /(?:\d{4}[ -]?){4}/gm,
+    //                 replace:'**** **** **** ****',
+    //                 name: 'visa card'
+    //             },
+    //             {   regex: /^\d{3}-?\d{2}-?\d{4}$/,
+    //                 replace:'*** ** ****',
+    //                 name: 'ssn'
+    //             },
+    //             {
+    //                 regex: /^(?:[Pp][Oo]\s[Bb][Oo][Xx]|[0-9]+)\s(?:[0-9A-Za-z\.'#]|[^\S\r\n])+/,
+    //                 replace: 'xx xxx xx',
+    //                 name: 'address line 1'
+    //             },
+    //             {
+    //                 regex: /^\s*\S+(?:\s+\S+){2}/,
+    //                 replace: 'xx xxx',
+    //                 name: 'address line 1, 2'
+    //             },
+    //             {
+    //                 regex: /([a-zA-Z]+(?:\s+[a-zA-Z]+)?)\s+(\d{5}(?:[\-]\d{4})?)/,
+    //                 replace: 'xxxx xx xxxxx',
+    //                 name: 'city, state, zip'
+    //             },
+    //             {
+    //                 regex: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+    //                 replace: 'xx@xx.xxx',
+    //                 name: 'email'
+    //             },
+    //         ],
+    //         screens:{
+    //             'Home':{
+    //                 pause: false,
+    //                 takeScreenShot: true,
+    //                 blurScreenShot: 0,
+    //             },
+    //             'LoanDetails':{
+    //                 pause: false,
+    //                 takeScreenShot: true,
+    //                 blurScreenShot: 5,
+    //             },
+    //             'Settings':{
+    //                 pause: false,
+    //                 takeScreenShot: true,
+    //                 blurScreenShot: 0,
+    //             },
+    //         }
+    //     };
+    //     hclDiscoverRN.start( options ).then( (value) => {
+    //         console.debug('the session value is', value);
+    //         hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
+    //     });
+    // })
 
     const onStartShouldSetResponderCapture = useCallback((event) => {
         currentRoute.current = extractName(navigation) || navigation.current.getCurrentRoute().name;
@@ -817,5 +821,5 @@ export function clickclick(white: number, alpha: number): Promise<number> {
   return HclDiscover.clickclick(white, alpha);
 }
 
-export default HCLDiscoverReactNativeContainer;
+//export default HCLDiscoverReactNativeContainer;
 export const hclDiscoverRN = hclDiscoverLib;

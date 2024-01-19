@@ -1,22 +1,7 @@
-/*
-
-Copyright 2024-2025 HCL Software
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-*/
-
 /**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
  * @format
  */
 
@@ -46,8 +31,13 @@ import PersonalDetails from './PersonalDetails';
 import HelpScreen from './HelpScreen';
 import LoanDetails from './LoanDetails';
 
-import HCLDiscoverReactNative from './HCLDiscoverReactNative';
-import {hclDiscoverLibInstance} from './HCLDiscoverReactNative';
+// import HCLDiscoverReactNative from './HCLDiscoverReactNative';
+// import {hclDiscoverLibInstance} from './HCLDiscoverReactNative';
+// <HCLDiscoverReactNative></HCLDiscoverReactNative>
+
+
+import {HCLDiscoverReactNativeContainer, hclDiscoverRN} from 'react-native-hcl-discover';
+// <HCLDiscoverReactNativeContainer></HCLDiscoverReactNativeContainer>
 
 /* Navigation code */
 
@@ -109,10 +99,90 @@ function App() {
     console.log('.....')
     console.log('useEffect called in App.tsx')
     console.log('.....')
+ 
+ 
+    /* Initializer */
+    var options = {
+      postMessageUrl: 'http://192.168.86.53:3001/listener', 
+      //postMessageUrl: 'http://185.64.247.121/DiscoverUIPost.php', 
+      //postMessageUrl: 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
+      killSwitchUrl:'http://localhost:3001/killOrLive',
+      regexList:[
+          {   regex: /(?:\d{4}[ -]?){4}/gm,
+              replace:'**** **** **** ****',
+              name: 'visa card'
+          },
+          {   regex: /^\d{3}-?\d{2}-?\d{4}$/,
+              replace:'*** ** ****',
+              name: 'ssn'
+          },
+          {
+              regex: /^(?:[Pp][Oo]\s[Bb][Oo][Xx]|[0-9]+)\s(?:[0-9A-Za-z\.'#]|[^\S\r\n])+/,
+              replace: 'xx xxx xx',
+              name: 'address line 1'
+          },
+          {
+              regex: /^\s*\S+(?:\s+\S+){2}/,
+              replace: 'xx xxx',
+              name: 'address line 1, 2'
+          },
+          {
+              regex: /([a-zA-Z]+(?:\s+[a-zA-Z]+)?)\s+(\d{5}(?:[\-]\d{4})?)/,
+              replace: 'xxxx xx xxxxx',
+              name: 'city, state, zip'
+          },
+          {
+              regex: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+              replace: 'xx@xx.xxx',
+              name: 'email'
+          },
+      ],
+      screens:{
+          'Home':{
+              pause: false,
+              takeScreenShot: true,
+              blurScreenShot: 0,
+          },
+          'LoanDetails':{
+              pause: false,
+              takeScreenShot: true,
+              blurScreenShot: 5,
+          },
+          'Settings':{
+              pause: false,
+              takeScreenShot: true,
+              blurScreenShot: 0,
+          },
+      }
+  };
+  console.debug('Calling hclDiscoverRN.start', hclDiscoverRN.start);
+  hclDiscoverRN.start( options ).then( (value) => {
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      console.debug('the session value is', value);
+      //hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
+  });
+  })
+
+  useEffect(() =>{
+ 
   })
 
   return (
-    <HCLDiscoverReactNative>
+    <HCLDiscoverReactNativeContainer>
     <NavigationContainer
     ref={navigationRef}
     onReady={() =>{
@@ -140,7 +210,7 @@ function App() {
         <Stack.Screen name='Settings' component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-    </HCLDiscoverReactNative>
+    </HCLDiscoverReactNativeContainer>
   );
 }
 

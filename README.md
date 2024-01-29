@@ -105,18 +105,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 	};
 ```
 
+```js
+    /* Start of your app function */
 function App() {
-	/* Create a navigation reference; then pass it on to NavigationContainer as a ref */
-```js    
-    const navigationRef = React.useRef();
 ```
-	/*
-		....
-	*/
 
+```js
+    /* At the beginning of your app function */
+    /* Create a navigation reference; then pass it on to NavigationContainer as a ref */
+    const navigationRef = React.useRef();
+    /* Rest of your app variables and initializers */
+```
+
+```js
+    /* Inside your app function */
     /* Configure your screens and invoke start method on hclDiscoverReactNative */
-
-```js    
     useEffect(() =>{
             /* Initializer */
             var options = {
@@ -179,7 +182,11 @@ function App() {
             hclDiscoverReactNative.logAppContext( routeNameRef?.current? routeNameRef?.current : 'Home', '' ).then( resolve => {}, reject => {});
         });
     })
+```
 
+```js
+    /* HTML for your app function to return should resemble .. */
+    /* Wrap  NavigationContainer inside HCLDiscoverReactNativeContainer and setup ref={navigationRef} */
 	return (
 		<HCLDiscoverReactNativeContainer>
 		<NavigationContainer ref={navigationRef} >
@@ -194,7 +201,9 @@ function App() {
 	);
 ```
 
-}
+```js
+} /* End of your app function */
+```
 
 ## Contributing
 

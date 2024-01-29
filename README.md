@@ -73,30 +73,23 @@ cd ..
 
 ## Usage
 
-Import from  react-native-hcl-discover
-
 ```js
+    /* Import from  react-native-hcl-discover */
 import { hclDiscoverReactNative, HCLDiscoverReactNativeContainer } from 'react-native-hcl-discover';
 ```
 
-Create instance from  createNativeStackNavigator needed to create Navigation Stack later
-
 ```js
+    /* Create instance from  createNativeStackNavigator needed to create Navigation Stack later */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 ```
 
 ```js
-/*
-	Screens created with NativeStackScreenProps. For example -
-*/
-
+    /* Screens created with NativeStackScreenProps. For example - */
 	type Screen1Props = NativeStackScreenProps<RootStackParamList, "Screen1">;
-
 	const Screen1: React.FC<Screen1Props> = (props) => {
   			const handleGoToNextScreenFromScreen1 = () => {
     		props.navigation.push("Screen2")
    		};
-
 		return (
 			<View>
 			<Screen1View handleGoToNextScreen={handleGoToNextScreenFromScreen1}></Screen1View>

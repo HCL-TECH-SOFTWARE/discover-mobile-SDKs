@@ -15,7 +15,7 @@ Kindly read the [documentation here](README.md)
 
 ## Contributing
 
-[Details here](CONTRIBUTING)
+[Details here](CONTRIBUTING.md)
 
 ## License
 

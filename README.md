@@ -1,15 +1,16 @@
-## TOC
+# TOC
 
 - [Introduction](#introduction)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [Install](#install)
+- [Update](#update)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
 
-# Introduction
+## Introduction
 
-## React Native SDK and Developer Tools for HCL Discover
+### React Native SDK and Developer Tools for HCL Discover
 
 This repository includes the following : 
 
@@ -27,7 +28,7 @@ More details will be added here about installation, integration.
 3. HCL Discover React Native package uses react-native-device-info to collect various device details.
 4. react-native-sha256 and react-native-device-info will be added by following installation steps.
 
-## Installation
+## Install
 
 If you use yarn
 
@@ -48,17 +49,46 @@ pod install
 cd ..
 ```
 
+## Update
+
+If you use yarn
+
+```sh
+yarn upgrade react-native-hcl-discover 
+```
+
+Or if you use npm
+
+```sh
+npm update react-native-hcl-discover 
+```
+
+```sh
+cd ios
+rm -rf build
+pod install
+cd ..
+```
+
+
 ## Usage
 
+Import from  react-native-hcl-discover
+
 ```js
-	/* import from  react-native-hcl-discover */
 import { hclDiscoverReactNative, HCLDiscoverReactNativeContainer } from 'react-native-hcl-discover';
+```
 
-	/* create instance from  createNativeStackNavigator needed to create Navigation Stack later */
+Create instance from  createNativeStackNavigator needed to create Navigation Stack later
+
+```js
 const Stack = createNativeStackNavigator<RootStackParamList>();
+```
 
+```js
 /*
 	Screens created with NativeStackScreenProps. For example -
+*/
 
 	type Screen1Props = NativeStackScreenProps<RootStackParamList, "Screen1">;
 
@@ -73,17 +103,20 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 			</View>
 		);
 	};
-
-*/
+```
 
 function App() {
 	/* Create a navigation reference; then pass it on to NavigationContainer as a ref */
+```js    
     const navigationRef = React.useRef();
+```
 	/*
 		....
 	*/
 
-    /* Invoke start method on hclDiscoverReactNative */
+    /* Configure your screens and invoke start method on hclDiscoverReactNative */
+
+```js    
     useEffect(() =>{
             /* Initializer */
             var options = {
@@ -159,8 +192,9 @@ function App() {
 		</NavigationContainer>
 		</HCLDiscoverReactNativeContainer>
 	);
-}
 ```
+
+}
 
 ## Contributing
 

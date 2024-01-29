@@ -30,17 +30,19 @@ More details will be added here about installation, integration.
 
 ## Install
 
-If you use yarn
+> If you use yarn, cd to your project folder; copy and paste the following line in terminal window
 
 ```sh
 yarn add react-native-sha256 react-native-device-info react-native-hcl-discover 
 ```
 
-Or if you use npm
+> Or if you use npm
 
 ```sh
 npm install react-native-sha256 react-native-device-info react-native-hcl-discover 
 ```
+
+> Since npm auto linking is unreliable, do the following to install pods, just to be sure
 
 ```sh
 cd ios
@@ -51,17 +53,19 @@ cd ..
 
 ## Update
 
-If you use yarn
+> If you use yarn
 
 ```sh
 yarn upgrade react-native-hcl-discover 
 ```
 
-Or if you use npm
+> Or if you use npm
 
 ```sh
 npm update react-native-hcl-discover 
 ```
+
+> Install pods
 
 ```sh
 cd ios
@@ -73,18 +77,22 @@ cd ..
 
 ## Usage
 
+> Copy and paste the following line in your App.tsx / App.js file
+
 ```js
     /* Import from  react-native-hcl-discover */
 import { hclDiscoverReactNative, HCLDiscoverReactNativeContainer } from 'react-native-hcl-discover';
 ```
 
+> As mentioned in prerequisites, for screen change tracking, HCL Discover React Native SDK assumes - your application is already setup with react navigation
+
 ```js
-    /* Create instance from  createNativeStackNavigator needed to create Navigation Stack later */
+    /* Your app is expected to create instance from  createNativeStackNavigator needed to create Navigation Stack later */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 ```
 
 ```js
-    /* Screens created with NativeStackScreenProps. For example - */
+    /* Your app is expected to create Screens with NativeStackScreenProps. For example - */
 	type Screen1Props = NativeStackScreenProps<RootStackParamList, "Screen1">;
 	const Screen1: React.FC<Screen1Props> = (props) => {
   			const handleGoToNextScreenFromScreen1 = () => {
@@ -103,12 +111,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function App() {
 ```
 
+> Copy and paste the following line in your App function
+
 ```js
     /* At the beginning of your app function */
     /* Create a navigation reference; then pass it on to NavigationContainer as a ref */
     const navigationRef = React.useRef();
     /* Rest of your app variables and initializers */
 ```
+> Copy and paste the following code block in your App function. This invokes start method of the SDK. Edit screen settings as needed.
 
 ```js
     /* Inside your app function */
@@ -155,27 +166,33 @@ function App() {
                     takeScreenShot: true,
                     blurScreenShot: 0,
                 },
-                'LoanDetails':{
+                'Screen1':{
+                    pause: false,
+                    takeScreenShot: true,
+                    blurScreenShot: 0,
+                },
+                'Screen2':{
                     pause: false,
                     takeScreenShot: true,
                     blurScreenShot: 5,
                 },
-                'Settings':{
+                'Screen3':{
                     pause: false,
                     takeScreenShot: true,
                     blurScreenShot: 0,
                 },
             }
         };
-        console.debug('Calling hclDiscoverReactNative.start', hclDiscoverReactNative.start);
         hclDiscoverReactNative.start( options ).then( (value) => {
-            console.debug('the session value is', value);
+            console.debug('The hcl discover session id is', value);
             
             /* Invoke First Screen Change event log as first screen was invoked well before HCL Discover React Native SDK booted */
             hclDiscoverReactNative.logAppContext( routeNameRef?.current? routeNameRef?.current : 'Home', '' ).then( resolve => {}, reject => {});
         });
     })
 ```
+
+> Your App's HTML code should be approximately as follows
 
 ```js
     /* HTML for your app function to return should resemble .. */
@@ -200,7 +217,8 @@ function App() {
 
 ## Contributing
 
-Kindly reach out to HCL Discover SDK Team
+Kindly reach out to HCL Discover SDK Team.
+[Details here](CONTRIBUTING.md)
 
 ## License
 

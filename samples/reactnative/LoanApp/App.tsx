@@ -36,7 +36,7 @@ import LoanDetails from './LoanDetails';
 // <HCLDiscoverReactNative></HCLDiscoverReactNative>
 
 
-import {HCLDiscoverReactNativeContainer, hclDiscoverRN} from 'react-native-hcl-discover';
+import {HCLDiscoverReactNativeContainer, hclDiscoverReactNative} from 'react-native-hcl-discover';
 // <HCLDiscoverReactNativeContainer></HCLDiscoverReactNativeContainer>
 
 /* Navigation code */
@@ -103,9 +103,8 @@ function App() {
  
     /* Initializer */
     var options = {
-      postMessageUrl: 'http://192.168.86.53:3001/listener', 
-      //postMessageUrl: 'http://185.64.247.121/DiscoverUIPost.php', 
-      //postMessageUrl: 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
+      //postMessageUrl: 'http://192.168.86.53:3001/listener', 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
+      postMessageUrl: 'https://slicendice.vercel.app/listener', 
       killSwitchUrl:'http://localhost:3001/killOrLive',
       regexList:[
           {   regex: /(?:\d{4}[ -]?){4}/gm,
@@ -155,25 +154,10 @@ function App() {
           },
       }
   };
-  console.debug('Calling hclDiscoverRN.start', hclDiscoverRN.start);
-  hclDiscoverRN.start( options ).then( (value) => {
+  console.debug('Calling hclDiscoverReactNative.start', hclDiscoverReactNative.start);
+  hclDiscoverReactNative.start( options ).then( (value) => {
       console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      console.debug('the session value is', value);
-      //hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
+      hclDiscoverReactNative.logAppContext( routeNameRef?.current? routeNameRef?.current : 'Home', '' ).then( resolve => {}, reject => {});
   });
   })
 

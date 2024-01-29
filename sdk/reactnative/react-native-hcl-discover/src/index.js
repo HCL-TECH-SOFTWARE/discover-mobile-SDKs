@@ -83,20 +83,20 @@ var hclDiscoverLib = (function () {
           }
       }
       _hclDiscoverLib.start = async (options:{}) => {
-            _hclDiscoverLib.debugLog('start invoked with : ', options);
+            _hclDiscoverLib?.debugLog('start invoked with : ', options);
             return new Promise( async (resolve, reject) => {
                   if( _sessionId.length > 0){
                       _hclDiscoverLib.stop();
                   }
                   generateSessionId().then( async (value) => {
-                      _hclDiscoverLib.debugLog('generated session id, initializing configurations ');
+                      _hclDiscoverLib?.debugLog('generated session id, initializing configurations ');
                       /* init */
                       _postMessageUrl = (options && options.postMessageUrl) ? options.postMessageUrl : _postMessageUrl;
                       _killSwitchUrl = (options && options.killSwitchUrl) ? options.killSwitchUrl : _killSwitchUrl;
                       _regexList = (options && options.regexList) ? options.regexList : _regexList;
                       _screens = (options && options.screens) ? options.screens : _screens;
                       
-                      _hclDiscoverLib.debugLog( 'starting session with sessionId : ', value, ' and _screens ', _screens );
+                      _hclDiscoverLib?.debugLog( 'starting session with sessionId : ', value, ' and _screens ', _screens );
                       
                       _totalMemory ? _totalMemory : DeviceInfo.getTotalMemory().then( async (promiseVal) => {_totalMemory = promiseVal});
                       _totalStorage ? _totalStorage : DeviceInfo.getTotalDiskCapacity().then( async (promiseVal) => {_totalStorage = promiseVal});
@@ -133,7 +133,7 @@ var hclDiscoverLib = (function () {
           _paused = false;
       }
       _hclDiscoverLib.printSessionId = () => {
-          _hclDiscoverLib.debugLog('sessionId is :', _sessionId);
+            _hclDiscoverLib?.debugLog('sessionId is :', _sessionId);
       }
       _hclDiscoverLib.getSessionId = () => {
           return _sessionId;
@@ -141,19 +141,19 @@ var hclDiscoverLib = (function () {
       /* type 2 : screenview */
       _hclDiscoverLib.logAppContext = async (screenName:string, referrerScreenName:string) => {
           return new Promise( async (resolve, reject) => {
-              _hclDiscoverLib.debugLog(`Type 2 : Screen Change : From ${referrerScreenName} to ${screenName}`);
+              _hclDiscoverLib?.debugLog(`Type 2 : Screen Change : From ${referrerScreenName} to ${screenName}`);
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
-                  reject(false);
+                    _hclDiscoverLib?.debugLog('Discover not initialized');
+                    reject(false);
               }
               _currentScreenName = screenName;
               var currentScreenConfigs = _defaultScreen;
               if( _screens && _screens[_currentScreenName] ){
                   currentScreenConfigs = _screens[_currentScreenName];
               }
-              _hclDiscoverLib.debugLog('New screen configs : ', currentScreenConfigs);
+              _hclDiscoverLib?.debugLog('New screen configs : ', currentScreenConfigs);
               if( currentScreenConfigs.pause ){ /** Add paused screen message so that it gets flushed */
-                  _hclDiscoverLib.debugLog('Adding new screen message and flushing before pausing');
+                  _hclDiscoverLib?.debugLog('Adding new screen message and flushing before pausing');
                   _screenViewLoadTime = Date.now();
                   _messages.push({
                       type: 2,
@@ -175,11 +175,11 @@ var hclDiscoverLib = (function () {
                   await _hclDiscoverLib.pause(); /* pause will flush */
                   _messages = []; /* we flushed and paused, reset queue */
               }else if( (_paused == true) && (currentScreenConfigs.pause == false)){
-                  _hclDiscoverLib.debugLog('Discover was paused, resuming');
+                  _hclDiscoverLib?.debugLog('Discover was paused, resuming');
                   await _hclDiscoverLib.resume(); /** if already paused and if current configs */
               }
               if( (_sessionId != undefined) && (_sessionId.length > 0)  && (_paused == false) ){
-                  _hclDiscoverLib.debugLog('Discover is not paused, logging new screen.');
+                  _hclDiscoverLib?.debugLog('Discover is not paused, logging new screen.');
                   /** New Screen */
                   if( _messages.length > 0 ){
                       flushQueue([..._messages]).then( resolve => {}, reject => {});
@@ -223,11 +223,11 @@ var hclDiscoverLib = (function () {
       _hclDiscoverLib.logConnection = async (connectionData:{}) => {
           return new Promise( async (resolve, reject) => {
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               if( _paused == true ){
-                  _hclDiscoverLib.debugLog('Discover is paused');
+                  _hclDiscoverLib?.debugLog('Discover is paused');
                   reject(false);
               }
               _messages.push({
@@ -243,11 +243,11 @@ var hclDiscoverLib = (function () {
       _hclDiscoverLib.logTextChange = async (newValue:string, targetId:string) => {
           return new Promise( async (resolve, reject) => {
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               if( _paused == true ){
-                  _hclDiscoverLib.debugLog('Discover is paused');
+                  _hclDiscoverLib?.debugLog('Discover is paused');
                   reject(false);
               }
               else{
@@ -257,18 +257,18 @@ var hclDiscoverLib = (function () {
                       _regexList.every(regexItem => {
                           textValue = newValue.replace(regexItem.regex, regexItem.replace ? regexItem.replace : 'xxx');
                           if( textValue != newValue ){
-                              _hclDiscoverLib.debugLog( newValue, ' did match ', regexItem.regex.toString(), ' breaking ' );
+                              _hclDiscoverLib?.debugLog( newValue, ' did match ', regexItem.regex.toString(), ' breaking ' );
                               currentRegex = regexItem;
                               return false;
                           }
                           else{
-                              _hclDiscoverLib.debugLog( newValue, ' did not match ', regexItem.regex.toString(), ' continuing ' );
+                              _hclDiscoverLib?.debugLog( newValue, ' did not match ', regexItem.regex.toString(), ' continuing ' );
                               return true;
                           }
                       });
                   }
                   
-                  _hclDiscoverLib.debugLog('Type 4 : Text Change " ' +  textValue + ' " on target " ' + targetId + ' " ');
+                  _hclDiscoverLib?.debugLog('Type 4 : Text Change " ' +  textValue + ' " on target " ' + targetId + ' " ');
                   var currentScreenConfigs = _defaultScreen;
                   if( _screens && _screens[_currentScreenName] ){
                       currentScreenConfigs = _screens[_currentScreenName];
@@ -310,11 +310,11 @@ var hclDiscoverLib = (function () {
       _hclDiscoverLib.logEvent = async (evt:{}) => {
           return new Promise( async (resolve, reject) => {
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               if( _paused == true ){
-                  _hclDiscoverLib.debugLog('Discover is paused');
+                  _hclDiscoverLib?.debugLog('Discover is paused');
                   reject(false);
               }
               _messages.push({
@@ -330,11 +330,11 @@ var hclDiscoverLib = (function () {
       _hclDiscoverLib.logException = async (exceptionData:{}) => {
           return new Promise( async (resolve, reject) => {
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               if( _paused == true ){
-                  _hclDiscoverLib.debugLog('Discover is paused');
+                  _hclDiscoverLib?.debugLog('Discover is paused');
                   reject(false);
               }
               _messages.push({
@@ -350,14 +350,14 @@ var hclDiscoverLib = (function () {
       _hclDiscoverLib.logTouch = async (evt) => {
           return new Promise( async (resolve, reject) => {
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               if( _paused == true ){
-                  _hclDiscoverLib.debugLog('Discover is paused');
+                  _hclDiscoverLib?.debugLog('Discover is paused');
                   reject(false);
               }else{
-                      _hclDiscoverLib.debugLog( 'Type 11 : Touch : event pageX, PageY, x, y : ' + evt.nativeEvent.pageX + ', ' + evt.nativeEvent.pageY + ', ' + 
+                      _hclDiscoverLib?.debugLog( 'Type 11 : Touch : event pageX, PageY, x, y : ' + evt.nativeEvent.pageX + ', ' + evt.nativeEvent.pageY + ', ' + 
                                                   evt.nativeEvent.locationX + ', ' + evt.nativeEvent.locationY + ' on target : ' + evt.nativeEvent.target + ' event timeStamp : ' + evt.timeStamp + 
                                                   ' target class ' + evt.target.viewConfig.uiViewClassName + ' node handle : ' + findNodeHandle(evt.nativeEvent.target) +
                                                   ' Touch Id ' + evt.nativeEvent.identifier);
@@ -424,17 +424,17 @@ var hclDiscoverLib = (function () {
       }
       /* generate new session Id */
       const generateSessionId = async () => {
-            _hclDiscoverLib.debugLog('generateSessionId invoked');
+            _hclDiscoverLib?.debugLog('generateSessionId invoked');
             return new Promise( async (resolve, reject) => {
               var deviceIdStr = DeviceInfo.getDeviceId();
-              _hclDiscoverLib.debugLog('deviceIdStr is', deviceIdStr);
+              _hclDiscoverLib?.debugLog('deviceIdStr is', deviceIdStr);
               _sessionStartTime = Date.now();
               _screenViewLoadTime = _sessionStartTime;
               var dateTimeStr = _sessionStartTime.toString();
               sha256(deviceIdStr+dateTimeStr).then( hash => {
                   _sessionId = hash.toUpperCase();
                   _serialNumber = 1;
-                  _hclDiscoverLib.debugLog('generated sessionId is :', _sessionId);
+                  _hclDiscoverLib?.debugLog('generated sessionId is :', _sessionId);
                   resolve( _sessionId );
               })
           });
@@ -473,7 +473,7 @@ var hclDiscoverLib = (function () {
           return new Promise( async (resolve, reject) => {
           /* check if there is connection before posting */
               if( _sessionId == undefined || _sessionId.length <= 0 ){
-                  _hclDiscoverLib.debugLog('Discover not initialized');
+                  _hclDiscoverLib?.debugLog('Discover not initialized');
                   reject(false);
               }
               var isConnectedToWWW = true;
@@ -521,8 +521,8 @@ var hclDiscoverLib = (function () {
                       };
                   try {
                           var stringyfiedBody = JSON.stringify(requestBody);//JSON.stringify(requestBody, undefined, 2);
-                          _hclDiscoverLib.debugLog('Posting to : ', url);
-                          // _hclDiscoverLib.debugLog('Json data : ', stringyfiedBody);
+                          _hclDiscoverLib?.debugLog('Posting to : ', url);
+                          // _hclDiscoverLib?.debugLog('Json data : ', stringyfiedBody);
                           const response = await fetch(url, {
                                   method: 'POST',
                                   headers: requestHeaders,
@@ -534,20 +534,20 @@ var hclDiscoverLib = (function () {
                           const responseBody = response;
   
                           if (response.status !== 200) {
-                              _hclDiscoverLib.debugLog('Connection failed :', responseBody);
+                              _hclDiscoverLib?.debugLog('Connection failed :', responseBody);
                               reject(false);
                           }else{
-                              _hclDiscoverLib.debugLog('Connection finished :', responseBody);
+                              _hclDiscoverLib?.debugLog('Connection finished :', responseBody);
                               resolve(true);
                           }
   
                   } catch (error) {
-                      _hclDiscoverLib.debugLog('Connection failed : Fetch Exception : ', error);
+                      _hclDiscoverLib?.debugLog('Connection failed : Fetch Exception : ', error);
                       reject(false);
                   }    
               }
               else{
-                  _hclDiscoverLib.debugLog('Connection failed : No network');
+                  _hclDiscoverLib?.debugLog('Connection failed : No network');
                   reject(false);
               }
           });
@@ -567,17 +567,17 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     const deviceKeyPressHandler = (evt, bubbledEvent) => {
         if(evt == null){
             if( discoverTextTracker != '' ){
-                //console.log('Type 4 : Text Change " ' +  discoverTextTracker + ' " on target " ' + discoverTextTargetTracker + ' " ');
-                hclDiscoverRN.logTextChange( discoverTextTracker, discoverTextTargetTracker ).then( resolve => {}, reject => {});
+                //hclDiscoverReactNative?.debugLog('Type 4 : Text Change " ' +  discoverTextTracker + ' " on target " ' + discoverTextTargetTracker + ' " ');
+                hclDiscoverReactNative.logTextChange( discoverTextTracker, discoverTextTargetTracker ).then( resolve => {}, reject => {});
             }
         }
         if( bubbledEvent == 'DiscoverTextChangeCompleteEvent' ){
             discoverTextTracker = '';
             discoverTextTargetTracker = '';
-            //console.log('DiscoverTextChangeEvent Event ' +  discoverTextTracker + ' bubbledEvent ' + bubbledEvent); 
+            //hclDiscoverReactNative?.debugLog('DiscoverTextChangeEvent Event ' +  discoverTextTracker + ' bubbledEvent ' + bubbledEvent); 
         }
         else {
-            //console.log('Global Key Press Event ' +  evt?.nativeEvent?.text + ' bubbledEvent ' + bubbledEvent + ' evt ' + evt + ' evet.nativeEvent.target ' + evt?.nativeEvent?.target ); 
+            //hclDiscoverReactNative?.debugLog('Global Key Press Event ' +  evt?.nativeEvent?.text + ' bubbledEvent ' + bubbledEvent + ' evt ' + evt + ' evet.nativeEvent.target ' + evt?.nativeEvent?.target ); 
             discoverTextTracker = evt?.nativeEvent?.text;
             discoverTextTargetTracker = evt?.nativeEvent?.target;
         }
@@ -588,18 +588,18 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
             TextInput.defaultProps = TextInput.defaultProps || {};
 
-            console.log( 'Text Input props 1: ' + TextInput.defaultProps.onChange )
+            hclDiscoverReactNative?.debugLog( 'Text Input props 1: ' + TextInput.defaultProps.onChange )
 
             var theTextHandlerVar = evt => deviceKeyPressHandler(evt, 'GlobalKeyPressEvent');
             TextInput.defaultProps.onChange = theTextHandlerVar;
 
-            console.log( 'Text Input props 2: ' + TextInput.defaultProps.onChange )
+            hclDiscoverReactNative?.debugLog( 'Text Input props 2: ' + TextInput.defaultProps.onChange )
 
-            console.log( 'Text Input props 3: ' + (theTextHandlerVar) )
+            hclDiscoverReactNative?.debugLog( 'Text Input props 3: ' + (theTextHandlerVar) )
 
-            console.log( 'Text Input props 3.5: ' + ((theTextHandlerVar) == TextInput.defaultProps.onChange ) )
+            hclDiscoverReactNative?.debugLog( 'Text Input props 3.5: ' + ((theTextHandlerVar) == TextInput.defaultProps.onChange ) )
 
-            console.log( 'Text Input props 4: ' + TextInput.defaultProps.onEndEditing )
+            hclDiscoverReactNative?.debugLog( 'Text Input props 4: ' + TextInput.defaultProps.onEndEditing )
         });
         const hideSubscription = Keyboard.addListener('keyboardDidHide', (evt) => {
             TextInput.defaultProps = TextInput.defaultProps || {};
@@ -617,9 +617,9 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     
     useEffect(() => {
 
-        console.log('.....')
-        console.debug('navigation changed : ', navigation)
-        console.log('.....')
+        hclDiscoverReactNative?.debugLog('.....')
+        hclDiscoverReactNative?.debugLog('navigation changed : ', navigation)
+        hclDiscoverReactNative?.debugLog('.....')
 
         if(!navigation || typeof navigation.current.addListener !== 'function' || typeof navigation.current.getCurrentRoute !== 'function'){
             // console.warn('HCLDiscoverReactNative: The HCLDiscoverReactNative components first child must be a NavigationContainer with a ref.');
@@ -634,13 +634,13 @@ export const HCLDiscoverReactNativeContainer = (props) => {
             } else if (Platform.OS === 'android') {
                 // HCLDiscoverReactNativeBridge.logScreenLayout(currentRoute.current);
             }
-            //console.log(`Type 2 : Screen Change : From ${previousRouteName} to ${currentRoute.current}`);
-            hclDiscoverRN.logAppContext( currentRoute.current, previousRouteName ).then( resolve => {}, reject => {});
+            //_hclDiscoverLib?.debugLog(`Type 2 : Screen Change : From ${previousRouteName} to ${currentRoute.current}`);
+            hclDiscoverReactNative.logAppContext( currentRoute.current, previousRouteName ).then( resolve => {}, reject => {});
         });
         
         const unsubscribeOptions = navigation.current.addListener('options', (e) => {
             // You can get the new options for the currently focused screen
-            console.log(e.data.options);
+            hclDiscoverReactNative?.debugLog(e.data.options);
           });
 
         return unsubscribe;
@@ -649,22 +649,22 @@ export const HCLDiscoverReactNativeContainer = (props) => {
 
     useEffect(() => {
 
-        console.log('.....')
-        console.debug('navigation current changed : ', navigation.current)
-        console.log('.....')
+        hclDiscoverReactNative?.debugLog('.....')
+        hclDiscoverReactNative?.debugLog('navigation current changed : ', navigation.current)
+        hclDiscoverReactNative?.debugLog('.....')
 
         const unsubscribeOptions = navigation.current.addListener('options', (e) => {
             // You can get the new options for the currently focused screen
-            console.log('navigation current options', e.data.options);
+            hclDiscoverReactNative?.debugLog('navigation current options', e.data.options);
           });
 
         return unsubscribeOptions;
     }, [navigation.current]);
 
     useEffect(() =>{
-        console.log('.....')
-        console.debug('children changed : ', children)
-        console.log('.....')
+        hclDiscoverReactNative?.debugLog('.....')
+        hclDiscoverReactNative?.debugLog('children changed : ', children)
+        hclDiscoverReactNative?.debugLog('.....')
     },[])
 
     // useEffect(() =>{
@@ -722,9 +722,9 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     //             },
     //         }
     //     };
-    //     hclDiscoverRN.start( options ).then( (value) => {
+    //     hclDiscoverReactNative.start( options ).then( (value) => {
     //         console.debug('the session value is', value);
-    //         hclDiscoverRN.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
+    //         hclDiscoverReactNative.logAppContext( currentRoute?.current? currentRoute.current : 'Home', '' ).then( resolve => {}, reject => {});
     //     });
     // })
 
@@ -741,30 +741,30 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         //     }
         // );
         
-        //console.log( 'captured event : ' + util.inspect(baseEvent, {showHidden: false, depth: null}) + ' on target : ' + event.nativeEvent.target );
-        //console.log( 'Type 11 : Touch : event pageX, PageY, x, y : ' + event.nativeEvent.pageX + ', ' + event.nativeEvent.pageY + ', ' + event.nativeEvent.locationX + ', ' + event.nativeEvent.locationY + ' on target : ' + event.nativeEvent.target + ' event timeStamp : ' + event.timeStamp );
-        hclDiscoverRN.debugFlag = true;
-        hclDiscoverRN.printSessionId();
-        hclDiscoverRN.logTouch(event).then( resolve => {}, reject => {});
+        //hclDiscoverReactNative?.debugLog( 'captured event : ' + util.inspect(baseEvent, {showHidden: false, depth: null}) + ' on target : ' + event.nativeEvent.target );
+        //hclDiscoverReactNative?.debugLog( 'Type 11 : Touch : event pageX, PageY, x, y : ' + event.nativeEvent.pageX + ', ' + event.nativeEvent.pageY + ', ' + event.nativeEvent.locationX + ', ' + event.nativeEvent.locationY + ' on target : ' + event.nativeEvent.target + ' event timeStamp : ' + event.timeStamp );
+        hclDiscoverReactNative.debugFlag = true;
+        hclDiscoverReactNative.printSessionId();
+        hclDiscoverReactNative.logTouch(event).then( resolve => {}, reject => {});
 
         // Following gives us the right element type to track for example RCTSinglelineTextInputView or AndroidTextInput
         // Which is the info we need to use to enable text change tracking instead of keyboardshow and hide
         // once you lose the tap to some other element for example a button or another textinput; you capture it as textchange
         console.debug(event.target.viewConfig.uiViewClassName); 
 
-        console.log(' node handle : ' + findNodeHandle(event.nativeEvent.target) )
+        hclDiscoverReactNative?.debugLog(' node handle : ' + findNodeHandle(event.nativeEvent.target) )
 
-        //console.log( 'Element is : ' + ReactNativeComponentTree.getInstanceFromNode(event.nativeEvent.target) );
+        //hclDiscoverReactNative?.debugLog( 'Element is : ' + ReactNativeComponentTree.getInstanceFromNode(event.nativeEvent.target) );
 
         // recurisveIterate(children);
-        //console.log(children.props.children.props.children[0].props.component);
+        //hclDiscoverReactNative?.debugLog(children.props.children.props.children[0].props.component);
 
         React.Children.map(children, (child, childIndex) => {
-            // console.log('child is : ', child);
-            //console.log('text is : ', event?.nativeEvent?.text);
+            // hclDiscoverReactNative?.debugLog('child is : ', child);
+            //hclDiscoverReactNative?.debugLog('text is : ', event?.nativeEvent?.text);
             deviceKeyPressHandler(null, 'DiscoverTextChangeCompleteEvent');
             React.Children.map(child, i => {
-                //console.log('i is : ', i);
+                //hclDiscoverReactNative?.debugLog('i is : ', i);
             })
         })
 
@@ -772,8 +772,8 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     }, []);
     
     const onStartShouldSetPanResponderCapture = useCallback((event, gestureState) => {
-        console.log( "onStartShouldSetPanResponderCapture : event ", event  );
-        console.log( "onStartShouldSetPanResponderCapture : gestureState ", gestureState  );
+        hclDiscoverReactNative?.debugLog( "onStartShouldSetPanResponderCapture : event ", event  );
+        hclDiscoverReactNative?.debugLog( "onStartShouldSetPanResponderCapture : gestureState ", gestureState  );
     }, []);
 
     const onLayout = useCallback(() => {
@@ -786,7 +786,7 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         } else if (Platform.OS === 'android') {
             // HCLDiscoverReactNativeBridge.logScreenLayout(currentRoute.current);
         }
-        console.log(`Type 10 : Screen : ${currentRoute.current}`);
+        hclDiscoverReactNative?.debugLog(`Type 10 : Screen : ${currentRoute.current}`);
     }, [navigation]);
 
     return (
@@ -821,5 +821,4 @@ export function clickclick(white: number, alpha: number): Promise<number> {
   return HclDiscover.clickclick(white, alpha);
 }
 
-//export default HCLDiscoverReactNativeContainer;
-export const hclDiscoverRN = hclDiscoverLib;
+export const hclDiscoverReactNative = hclDiscoverLib;

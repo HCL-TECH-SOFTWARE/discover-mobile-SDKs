@@ -2,30 +2,20 @@
 
 Discover SDK for HCL Software
 
-## Installation
 
-```sh
-npm install react-native-hcl-discover
-```
+## TOC
 
-## Usage
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-```js
-import { hclDiscoverLibInstance, HCLDiscoverReactNative } from 'react-native-hcl-discover';
+## Documentation
 
-// ...
-
-    <HCLDiscoverReactNative>
-	<NavigationContainer>
-		{your application code here}
-	</NavigationContainer>
-    </HCLDiscoverReactNative>
-
-```
+Kindly read the [documentation here](README.md)
 
 ## Contributing
 
-Kindly reach out to HCL Discover SDK Team
+[Details here](CONTRIBUTING)
 
 ## License
 

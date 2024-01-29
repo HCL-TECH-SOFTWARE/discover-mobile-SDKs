@@ -87,9 +87,11 @@ import { hclDiscoverReactNative, HCLDiscoverReactNativeContainer } from 'react-n
 > As mentioned in prerequisites, for screen change tracking, HCL Discover React Native SDK assumes - your application is already setup with react navigation
 
 ```js
-    /* Your app is expected to create instance from  createNativeStackNavigator needed to create Navigation Stack later */
+    /* Your app is expected to create instance from createNativeStackNavigator needed to create Navigation Stack later */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 ```
+
+> Your app may already be using NativeStackScreenProps to create Screen Props and Screens as in the example below
 
 ```js
     /* Your app is expected to create Screens with NativeStackScreenProps. For example - */
@@ -127,7 +129,6 @@ function App() {
     useEffect(() =>{
             /* Initializer */
             var options = {
-            //postMessageUrl: 'http://192.168.86.53:3001/listener', 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
             postMessageUrl: 'https://slicendice.vercel.app/listener', 
             killSwitchUrl:'http://localhost:3001/killOrLive',
             regexList:[
@@ -184,7 +185,7 @@ function App() {
             }
         };
         hclDiscoverReactNative.start( options ).then( (value) => {
-            console.debug('The hcl discover session id is', value);
+            console.debug('The hcl discover session id is : ', value);
             
             /* Invoke First Screen Change event log as first screen was invoked well before HCL Discover React Native SDK booted */
             hclDiscoverReactNative.logAppContext( routeNameRef?.current? routeNameRef?.current : 'Home', '' ).then( resolve => {}, reject => {});

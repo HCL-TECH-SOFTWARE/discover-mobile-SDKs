@@ -30,19 +30,19 @@ More details will be added here about installation, integration.
 
 ## Install
 
-> If you use yarn, cd to your project folder; copy and paste the following line in terminal window
+> 1. If you use yarn, cd to your project folder; copy and paste the following line in terminal window
 
 ```sh
 yarn add react-native-sha256 react-native-device-info react-native-hcl-discover 
 ```
 
-> Or if you use npm
+> 2. Or if you use npm
 
 ```sh
 npm install react-native-sha256 react-native-device-info react-native-hcl-discover 
 ```
 
-> Since npm auto linking is unreliable, do the following to install pods, just to be sure
+> 3. Since npm auto linking is unreliable, do the following to install pods, just to be sure
 
 ```sh
 cd ios
@@ -51,21 +51,27 @@ pod install
 cd ..
 ```
 
+> 4. After running ```pod install``` above, if you do not see react-native-sha256 pod being installed, you may need to add following line to your Podfile; and after adding the following line re-run above commands in step 3 again.
+
+```sh
+pod 'RNSha256', :path => '../node_modules/react-native-sha256'
+```
+
 ## Update
 
-> If you use yarn
+> 1. If you use yarn
 
 ```sh
 yarn upgrade react-native-hcl-discover 
 ```
 
-> Or if you use npm
+> 2. Or if you use npm
 
 ```sh
 npm update react-native-hcl-discover 
 ```
 
-> Install pods
+> 3. Install pods
 
 ```sh
 cd ios
@@ -77,7 +83,7 @@ cd ..
 
 ## Usage
 
-> Copy and paste the following line in your App.tsx / App.js file
+> 1. Copy and paste the following line in your App.tsx / App.js file
 
 ```js
     /* Import from  react-native-hcl-discover */
@@ -113,7 +119,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function App() {
 ```
 
-> Copy and paste the following line in your App function
+> 2. Copy and paste the following line in your App function
 
 ```js
     /* At the beginning of your app function */
@@ -121,7 +127,7 @@ function App() {
     const navigationRef = React.useRef();
     /* Rest of your app variables and initializers */
 ```
-> Copy and paste the following code block in your App function. This invokes start method of the SDK. Edit screen settings as needed.
+> 3. Copy and paste the following code block in your App function. This invokes start method of the SDK. Edit screen settings as needed.
 
 ```js
     /* Inside your app function */

@@ -137,21 +137,21 @@ function App() {
           },
       ],
       screens:{
-          'Home':{
-              pause: false,
-              takeScreenShot: true,
-              blurScreenShot: 0,
-          },
-          'LoanDetails':{
-              pause: false,
-              takeScreenShot: true,
-              blurScreenShot: 5,
-          },
-          'Settings':{
-              pause: false,
-              takeScreenShot: true,
-              blurScreenShot: 0,
-          },
+          // 'Home':{
+          //     pause: false,
+          //     takeScreenShot: true,
+          //     blurScreenShot: 0,
+          // },
+          // 'LoanDetails':{
+          //     pause: false,
+          //     takeScreenShot: true,
+          //     blurScreenShot: 5,
+          // },
+          // 'Settings':{
+          //     pause: false,
+          //     takeScreenShot: true,
+          //     blurScreenShot: 0,
+          // },
       }
   };
   console.debug('Calling hclDiscoverReactNative.start', hclDiscoverReactNative.start);

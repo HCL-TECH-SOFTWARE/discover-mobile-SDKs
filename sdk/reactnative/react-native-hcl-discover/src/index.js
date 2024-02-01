@@ -51,6 +51,8 @@ var hclDiscoverLib = (function () {
       var _paused = false;
       var _postMessageUrl = 'http://192.168.86.23:3001/listener'; // 'http://185.64.247.121/DiscoverUIPost.php';
       var _killSwitchUrl = 'http://localhost:3001/killOrLive';
+      var _flushQueueTimerInterval = 0;
+      var _stopFlushQueueTimer = false;
       var _regexList = [];
       var _screens = {};
       var _currentScreenName = '';
@@ -95,6 +97,16 @@ var hclDiscoverLib = (function () {
                       _killSwitchUrl = (options && options.killSwitchUrl) ? options.killSwitchUrl : _killSwitchUrl;
                       _regexList = (options && options.regexList) ? options.regexList : _regexList;
                       _screens = (options && options.screens) ? options.screens : _screens;
+
+                      if( _screens && Object.keys(_screens).length == 0 ){
+                        _hclDiscoverLib?.debugLog('There are No screens defined, will start flush timer');
+                        _flushQueueTimerInterval = options.flushQueueTimerInterval? options.flushQueueTimerInterval : 7000;
+                        if( _flushQueueTimerInterval < 7000 ){
+                            _flushQueueTimerInterval = 7000;
+                        }
+                      }else{
+                        _hclDiscoverLib?.debugLog('There are screens defined, will not start flush timer');
+                      }
                       
                       _hclDiscoverLib?.debugLog( 'starting session with sessionId : ', value, ' and _screens ', _screens );
                       
@@ -110,12 +122,16 @@ var hclDiscoverLib = (function () {
                       if( Platform.OS === 'android'){
                           _fingerPrint.length ? _fingerPrint : DeviceInfo.getFingerprint().then( async (promiseVal) => {_fingerPrint = promiseVal});
                       }
+                      if( _flushQueueTimerInterval > 0 ){
+                        startFlushTimer();
+                      }
                       resolve(value);
                   }
               );
           });
       }
       _hclDiscoverLib.stop = async () => {
+          stopFlushTimer();
           if( _messages.length > 0 ){
               flushQueue([..._messages]).then( resolve => {}, reject => {});
           }
@@ -468,6 +484,33 @@ var hclDiscoverLib = (function () {
               });
           });
       }
+      const startFlushTimer = async () => {
+        if( _stopFlushQueueTimer == false ){
+            _hclDiscoverLib?.debugLog('Starting flush queue timer every ', _flushQueueTimerInterval, ' milliseconds');
+            (function queueFlushIteration() {
+                setTimeout(() => {
+                    if( _messages.length > 0 ){
+                        flushQueue([..._messages]).then( resolve => {}, reject => {});
+                        _messages = [];
+                    }else{
+                        _hclDiscoverLib?.debugLog('Nothing to flush');
+                    }
+                    
+                    if( _stopFlushQueueTimer == false ){
+                        queueFlushIteration();
+                    }else{
+                        _hclDiscoverLib?.debugLog('Cancelled flush queue timer');
+                    }
+                }, _flushQueueTimerInterval);
+            })();
+        }else{
+            _hclDiscoverLib?.debugLog('Flush queue timer is already on');
+        }
+      }
+      const stopFlushTimer = async () => {
+            _hclDiscoverLib?.debugLog('Cancelling flush queue timer');
+            _stopFlushQueueTimer = true;
+      }
       /* post to discover */
       const flushQueue = async (payload) => {
           return new Promise( async (resolve, reject) => {
@@ -516,8 +559,10 @@ var hclDiscoverLib = (function () {
                           "X_DISCOVER_HASUICDATA": false,
                           "X_DISCOVER": ( Platform.OS === 'ios' ) ? 'device (iOS) Lib/1.0.0' : 'device (android) Lib/1.0.0',
                           "X_TEALEAF_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
+                          "X_DISCOVER_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
                           "TlNativeReplay": true,
                           "TLTSID": _sessionId,
+                          "X_DISCOVER_REACTNATIVE_MERGEID": _sessionId,
                       };
                   try {
                           var stringyfiedBody = JSON.stringify(requestBody);//JSON.stringify(requestBody, undefined, 2);
@@ -743,14 +788,16 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         
         //hclDiscoverReactNative?.debugLog( 'captured event : ' + util.inspect(baseEvent, {showHidden: false, depth: null}) + ' on target : ' + event.nativeEvent.target );
         //hclDiscoverReactNative?.debugLog( 'Type 11 : Touch : event pageX, PageY, x, y : ' + event.nativeEvent.pageX + ', ' + event.nativeEvent.pageY + ', ' + event.nativeEvent.locationX + ', ' + event.nativeEvent.locationY + ' on target : ' + event.nativeEvent.target + ' event timeStamp : ' + event.timeStamp );
-        hclDiscoverReactNative.debugFlag = true;
-        hclDiscoverReactNative.printSessionId();
+        
+        // hclDiscoverReactNative.debugFlag = true;
+        // hclDiscoverReactNative.printSessionId();
+        
         hclDiscoverReactNative.logTouch(event).then( resolve => {}, reject => {});
 
         // Following gives us the right element type to track for example RCTSinglelineTextInputView or AndroidTextInput
         // Which is the info we need to use to enable text change tracking instead of keyboardshow and hide
         // once you lose the tap to some other element for example a button or another textinput; you capture it as textchange
-        console.debug(event.target.viewConfig.uiViewClassName); 
+        hclDiscoverReactNative?.debugLog(event.target.viewConfig.uiViewClassName); 
 
         hclDiscoverReactNative?.debugLog(' node handle : ' + findNodeHandle(event.nativeEvent.target) )
 

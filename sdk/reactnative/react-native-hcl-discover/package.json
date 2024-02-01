@@ -1,6 +1,6 @@
 {
   "name": "react-native-hcl-discover",
-  "version": "1.0.15",
+  "version": "1.0.19",
   "description": "Discover SDK for HCL Software",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

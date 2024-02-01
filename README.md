@@ -42,7 +42,7 @@ yarn add react-native-sha256 react-native-device-info react-native-hcl-discover
 npm install react-native-sha256 react-native-device-info react-native-hcl-discover 
 ```
 
-> 3. Since npm auto linking is unreliable, do the following to install pods, just to be sure
+> 3. This is for MacOS/iOS only. Not needed for windows dev setup. Since npm auto linking is unreliable, do the following to install pods, just to be sure
 
 ```sh
 cd ios
@@ -51,7 +51,7 @@ pod install
 cd ..
 ```
 
-> 4. After running ```pod install``` above, if you do not see react-native-sha256 pod being installed, you may need to add following line to your Podfile; and after adding the following line re-run above commands in step 3 again.
+> 4. This is for MacOS/iOS only. Not needed for windows dev setup. After running ```pod install``` above, if you do not see react-native-sha256 pod being installed, you may need to add following line to your Podfile; and after adding the following line re-run above commands in step 3 again.
 
 ```sh
 pod 'RNSha256', :path => '../node_modules/react-native-sha256'
@@ -71,7 +71,7 @@ yarn upgrade react-native-hcl-discover
 npm update react-native-hcl-discover 
 ```
 
-> 3. Install pods
+> 3. This is for MacOS/iOS only. Not needed for windows dev setup. Install pods
 
 ```sh
 cd ios

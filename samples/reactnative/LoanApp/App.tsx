@@ -103,9 +103,12 @@ function App() {
  
     /* Initializer */
     var options = {
-      //postMessageUrl: 'http://192.168.86.53:3001/listener', 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
-      postMessageUrl: 'https://slicendice.vercel.app/listener', 
-      killSwitchUrl:'http://localhost:3001/killOrLive',
+      //postMessageUrl: 'http://192.168.86.53:3001/listener',
+      //postMessageUrl: 'http://sky.discoverstore.hclcx.com/DiscoverUIPost.php',
+      postMessageUrl: 'http://185.64.247.121/DiscoverUIPost.php',
+      //postMessageUrl: 'http://vivre-retail.discoverstore.hclcx.com/DiscoverUIPost.php',
+      //postMessageUrl: 'https://slicendice.vercel.app/listener', 
+      //killSwitchUrl:'http://localhost:3001/killOrLive',
       regexList:[
           {   regex: /(?:\d{4}[ -]?){4}/gm,
               replace:'**** **** **** ****',

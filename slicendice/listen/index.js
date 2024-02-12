@@ -130,3 +130,17 @@ app.get('/get_images/:sessionId/', async (req, res) => {
   var messages = await mongoClient.db(mongoDB).collection(`sessionmessages_${req.params.sessionId}`).aggregate([{$sort:{offset:1}},{$project:{_id:0, 'image.base64Image':1, 'layout.controls':1}}]).toArray();
   res.send( {data: messages} );
 });
+app.get('/killswitch', async (req, res) => {
+  console.log(`killswitch invoked.`);
+  var messages = await mongoClient.db(mongoDB).collection(`killswitch`).find({id:1}).toArray();
+  var response = 0;
+  if( messages && messages[0] && (messages[0].value != undefined) && (messages[0].value != null) ){
+    response = messages[0].value;
+  }
+  res.send( response );
+});
+app.get('/set_killswitch/:killswitchvalue', async (req, res) => {
+  console.log(`set_killswitch invoked. killswitchvalue: ${req.params.killswitchvalue}`);
+  var messages = await mongoClient.db(mongoDB).collection(`killswitch`).updateOne({id:1}, {$set:{value:req.params.killswitchvalue}}, { upsert: true });
+  res.send( {data: messages} );
+});

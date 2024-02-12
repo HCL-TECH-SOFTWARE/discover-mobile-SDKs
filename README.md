@@ -51,7 +51,9 @@ pod install
 cd ..
 ```
 
-> 4. This is for MacOS/iOS only. Not needed for windows dev setup. After running ```pod install``` above, if you do not see react-native-sha256 pod being installed, you may need to add following line to your Podfile; and after adding the following line re-run above commands in step 3 again.
+> 4. This is for MacOS/iOS only. Not needed for windows dev setup. After running ```pod install``` above, if you do not see react-native-sha256 pod being installed, you may need to add following line to your Podfile; and after adding the following line re-run above commands in step 3 again. 
+
+IMPORTANT : Please note when you  ```rm -rf build``` and then ```pod install``` For your iOS project Info.plist file is regenerated. That may reset your App Transport Security Settings i.e. NSAppTransportSecurity and you will have to put back your custom settings in there.
 
 ```sh
 pod 'RNSha256', :path => '../node_modules/react-native-sha256'

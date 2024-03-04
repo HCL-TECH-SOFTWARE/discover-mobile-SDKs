@@ -22,6 +22,7 @@ import { StyleSheet , View, TextInput, Keyboard, findNodeHandle } from "react-na
 import DeviceInfo from 'react-native-device-info';
 import { sha256 } from 'react-native-sha256';
 
+const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.21';
 
 const LINKING_ERROR =
   `The package 'react-native-hcl-discover' doesn't seem to be linked. Make sure: \n\n` +
@@ -439,43 +440,46 @@ var hclDiscoverLib = (function () {
   
     /* private methods */
     const checkKillSwitch = async () => {
-        const requestHeaders = {
-            "Content-Type": "application/json",
-            "User-Agent": _userAgent,
-            "X_DISCOVER_HASUICDATA": false,
-            "X_DISCOVER": ( Platform.OS === 'ios' ) ? 'device (iOS) Lib/1.0.20' : 'device (android) Lib/1.0.20',
-            "X_TEALEAF_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
-            "X_DISCOVER_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
-            "TlNativeReplay": true,
-        };
-        try {
-            _hclDiscoverLib?.debugLog('Killswitch check : ', killSwitchUrl);
-            // _hclDiscoverLib?.debugLog('Json data : ', stringyfiedBody);
-            const response = await fetch(url, {
-                    method: 'GET',
-                    headers: requestHeaders,
-                    credentials: "same-origin",
-                    body: '',
-            });
-                
-            const responseBody = response;
-
-            if (response.status !== 200) {
-                _hclDiscoverLib?.debugLog('Killswitch check Connection failed :', responseBody);
-                reject(false);
-            }else{
-                _hclDiscoverLib?.debugLog('Killswitch check Connection finished :', responseBody);
-                if( responseBody && responseBody.toString().includes('1') ){
-                    resolve(true); 
-                }else{
+        if( killSwitchUrl && killSwitchUrl.length > 0 ){
+            const requestHeaders = {
+                "Content-Type": "application/json",
+                "User-Agent": _userAgent,
+                "X_DISCOVER_HASUICDATA": false,
+                "X_DISCOVER": ( Platform.OS === 'ios' ) ? `device (iOS) Lib/${REACT_NATIVE_HCL_DISCOVER_VERSION}` : `device (Android) Lib/${REACT_NATIVE_HCL_DISCOVER_VERSION}`,
+                "X_DISCOVER_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
+                "TlNativeReplay": true,
+            };
+            try {
+                _hclDiscoverLib?.debugLog('Killswitch check : ', killSwitchUrl);
+                // _hclDiscoverLib?.debugLog('Json data : ', stringyfiedBody);
+                const response = await fetch(url, {
+                        method: 'GET',
+                        headers: requestHeaders,
+                        credentials: "same-origin",
+                        body: '',
+                });
+                    
+                const responseBody = response;
+    
+                if (response.status !== 200) {
+                    _hclDiscoverLib?.debugLog('Killswitch check Connection failed :', responseBody);
                     reject(false);
+                }else{
+                    _hclDiscoverLib?.debugLog('Killswitch check Connection finished :', responseBody);
+                    if( responseBody && responseBody.toString().includes('1') ){
+                        resolve(true); 
+                    }else{
+                        reject(false);
+                    }
                 }
-            }
-
-        } catch (error) {
-            _hclDiscoverLib?.debugLog('Killswitch check Connection failed : Fetch Exception : ', error);
-            reject(false);
-        }    
+    
+            } catch (error) {
+                _hclDiscoverLib?.debugLog('Killswitch check Connection failed : Fetch Exception : ', error);
+                reject(false);
+            }  
+        }else{
+            resolve(true);
+        }
     }
 
     const offset = () => {
@@ -606,8 +610,7 @@ var hclDiscoverLib = (function () {
                         "Content-Type": "application/json",
                         "User-Agent": _userAgent,
                         "X_DISCOVER_HASUICDATA": false,
-                        "X_DISCOVER": ( Platform.OS === 'ios' ) ? 'device (iOS) Lib/1.0.20' : 'device (android) Lib/1.0.20',
-                        "X_TEALEAF_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
+                        "X_DISCOVER": ( Platform.OS === 'ios' ) ? `device (iOS) Lib/${REACT_NATIVE_HCL_DISCOVER_VERSION}` : `device (Android) Lib/${REACT_NATIVE_HCL_DISCOVER_VERSION}`,
                         "X_DISCOVER_PROPERTY": `TLT_SCREEN_HEIGHT=${Dimensions.get('window').height};TLT_SCREEN_WIDTH=${Dimensions.get('window').width};TLT_BRAND=${DeviceInfo.getBrand()}`,
                         "TlNativeReplay": true,
                         "TLTSID": _sessionId,

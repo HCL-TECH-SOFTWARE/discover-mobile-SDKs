@@ -22,7 +22,7 @@ import { StyleSheet , View, TextInput, Keyboard, findNodeHandle } from "react-na
 import DeviceInfo from 'react-native-device-info';
 import { sha256 } from 'react-native-sha256';
 
-const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.21';
+const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.22';
 
 const LINKING_ERROR =
   `The package 'react-native-hcl-discover' doesn't seem to be linked. Make sure: \n\n` +

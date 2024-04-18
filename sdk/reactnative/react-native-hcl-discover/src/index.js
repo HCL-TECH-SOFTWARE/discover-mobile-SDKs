@@ -22,7 +22,7 @@ import { StyleSheet , View, TextInput, Keyboard, findNodeHandle } from "react-na
 import DeviceInfo from 'react-native-device-info';
 import { sha256 } from 'react-native-sha256';
 
-const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.22';
+const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.23';
 
 const LINKING_ERROR =
   `The package 'react-native-hcl-discover' doesn't seem to be linked. Make sure: \n\n` +
@@ -177,6 +177,9 @@ var hclDiscoverLib = (function () {
             _hclDiscoverLib?.debugLog('New screen configs : ', currentScreenConfigs);
             if( currentScreenConfigs.pause ){ /** Add paused screen message so that it gets flushed */
                 _hclDiscoverLib?.debugLog('Adding new screen message and flushing before pausing');
+
+                _hclDiscoverLib?.debugLog('Testing Log');
+
                 _screenViewLoadTime = Date.now();
                 _messages.push({
                     type: 2,
@@ -191,6 +194,10 @@ var hclDiscoverLib = (function () {
                         base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : ''
                     }
                 });
+
+
+                console.log("ouptputPaylod", clientStateMessage);
+
                 captureClientState().then((clientStateMessage) => {
                     _messages.push(clientStateMessage);
                 });

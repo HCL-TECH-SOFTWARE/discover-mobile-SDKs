@@ -625,8 +625,12 @@ var hclDiscoverLib = (function () {
                     };
                 try {
                         var stringyfiedBody = JSON.stringify(requestBody);//JSON.stringify(requestBody, undefined, 2);
+
+                        _hclDiscoverLib?.debugLog('requestBody', requestBody);
+                        _hclDiscoverLib?.debugLog('Json_data : ', stringyfiedBody);
+
                         _hclDiscoverLib?.debugLog('Posting to : ', url);
-                        // _hclDiscoverLib?.debugLog('Json data : ', stringyfiedBody);
+                       
                         const response = await fetch(url, {
                                 method: 'POST',
                                 headers: requestHeaders,

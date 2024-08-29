@@ -8,6 +8,9 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+## What's New
+Fix for some fields showing wrong data.
+
 ## Introduction
 
 ### React Native SDK and Developer Tools for HCL Discover

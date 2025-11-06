@@ -9,7 +9,7 @@
 - [License](#license)
 
 ## What's New
-Fix for some fields showing wrong data.
+Resolved the issues with capturing blurred screenshots on Android.
 
 ## Introduction
 

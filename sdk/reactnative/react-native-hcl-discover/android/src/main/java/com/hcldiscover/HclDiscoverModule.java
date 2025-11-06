@@ -28,15 +28,21 @@ import com.facebook.react.module.annotations.ReactModule;
 
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Method;
 import java.util.Base64;
 
 import android.graphics.Bitmap;
+import android.graphics.Paint;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
+import android.os.Build;
 import android.view.View;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.content.Context;
+import android.graphics.Canvas;
 
 @ReactModule(name = HclDiscoverModule.NAME)
 public class HclDiscoverModule extends ReactContextBaseJavaModule {
@@ -68,33 +74,57 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
 
     Context context = getCurrentActivity().getApplicationContext();
 
-    try {
-            smallBitmap = RGB565toARGB888(smallBitmap);
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+           try {
+               // Use reflection to call Paint.setRenderEffect if available
+               Bitmap output = Bitmap.createBitmap(smallBitmap.getWidth(), smallBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+               Canvas canvas = new Canvas(output);
+               Paint paint = new Paint();
+
+               RenderEffect blurEffect = RenderEffect.createBlurEffect(
+                       (float) radius, (float) radius, Shader.TileMode.CLAMP);
+
+               // Safe reflection: only runs on Android 12+
+               Method setRenderEffect = Paint.class.getMethod("setRenderEffect", RenderEffect.class);
+               setRenderEffect.invoke(paint, blurEffect);
+
+               canvas.drawBitmap(smallBitmap, 0f, 0f, paint);
+               return output;
+           } catch (Throwable t) {
+               t.printStackTrace();
+               // Fallback if reflection fails
+               return blurRenderScriptLegacy(context, smallBitmap, radius);
+           }
+       } else {
+           return blurRenderScriptLegacy(context, smallBitmap, radius);
+       }
+    }
+
+    @SuppressWarnings("deprecation")
+    private Bitmap blurRenderScriptLegacy(Context context, Bitmap bitmap, double blurRadius) {
+        Bitmap inputBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
+
+        RenderScript rs = null;
+        try {
+            rs = RenderScript.create(context);
+            final Allocation input = Allocation.createFromBitmap(rs, inputBitmap);
+            final Allocation output = Allocation.createTyped(rs, input.getType());
+            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+            script.setRadius((float) Math.min(blurRadius, 25.0));
+            script.setInput(input);
+            script.forEach(output);
+            output.copyTo(outputBitmap);
         } catch (Exception e) {
             e.printStackTrace();
+            return bitmap;
+        } finally {
+            if (rs != null) rs.destroy();
         }
-    
-        Bitmap bitmap = Bitmap.createBitmap(
-                smallBitmap.getWidth(), smallBitmap.getHeight(),
-                Bitmap.Config.ARGB_8888);
-    
-        RenderScript renderScript = RenderScript.create(context);
-    
-        Allocation blurInput = Allocation.createFromBitmap(renderScript, smallBitmap);
-        Allocation blurOutput = Allocation.createFromBitmap(renderScript, bitmap);
-    
-        ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript,
-                Element.U8_4(renderScript));
-        blur.setInput(blurInput);
-        blur.setRadius((float)radius); // radius must be 0 < r <= 25
-        blur.forEach(blurOutput);
-    
-        blurOutput.copyTo(bitmap);
-        renderScript.destroy();
-    
-        return bitmap;
+
+        return outputBitmap;
     }
-    
+
     /**
      * 
      * @param img
@@ -140,31 +170,25 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
       String encodedImageString = "no image yet";
       try {
         // get root view of the activity
-        View v1 = getCurrentActivity().getWindow().getDecorView().getRootView();
-        v1.setDrawingCacheEnabled(true);
-        Bitmap bitmapOrg = Bitmap.createBitmap(v1.getDrawingCache());
-        v1.setDrawingCacheEnabled(false);
+          View rootView = getCurrentActivity().getWindow().getDecorView().getRootView();
 
-        Bitmap bitmap = null;
-        
-        if(blurRadius > 0){
-            bitmap = blurRenderScript( bitmapOrg, blurRadius );
-        }else{
-            bitmap = bitmapOrg;
-        }
+          // Draw view onto software bitmap
+          Bitmap bitmapOrg = Bitmap.createBitmap(rootView.getWidth(), rootView.getHeight(), Bitmap.Config.ARGB_8888);
+          Canvas canvas = new Canvas(bitmapOrg);
+          rootView.draw(canvas);
+
+          Bitmap bitmap = (blurRadius > 0)
+                  ? blurRenderScript(bitmapOrg, blurRadius)
+                  : bitmapOrg;
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int quality = 100;
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-        
         encodedImageString = Base64.getEncoder().encodeToString(outputStream.toByteArray());
-
         outputStream.close();
 
       } catch (Throwable e) {
-
         e.printStackTrace();
-
         encodedImageString = e.toString();
       }
 

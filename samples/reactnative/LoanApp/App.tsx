@@ -35,7 +35,6 @@ import LoanDetails from './LoanDetails';
 // import {hclDiscoverLibInstance} from './HCLDiscoverReactNative';
 // <HCLDiscoverReactNative></HCLDiscoverReactNative>
 
-
 import {HCLDiscoverReactNativeContainer, hclDiscoverReactNative} from 'react-native-hcl-discover';
 // <HCLDiscoverReactNativeContainer></HCLDiscoverReactNativeContainer>
 

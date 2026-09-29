@@ -24,6 +24,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.module.annotations.ReactModule;
 
 
@@ -31,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.util.Base64;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.RenderEffect;
@@ -72,7 +74,7 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
 
    public Bitmap blurRenderScript(Bitmap smallBitmap, double radius) {
 
-    Context context = getCurrentActivity().getApplicationContext();
+    Context context = getReactApplicationContext().getApplicationContext();
 
        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
            try {
@@ -157,43 +159,57 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
      * takeABlurredSnapshotWithWhite uses mostly android java apis. 
      * Except calls to find out current activity or context which are from react. 
      * They can be replaced with suitable android calls
-     * takeABlurredSnapshotWithWhite is synchronous method. 
+     * View capture runs on the UI thread; blur and encoding run on the native modules queue.
      * It takes blurRadius as needed by Gaussian Blur algorithm. Valid values are 1-25. 
      * If 0 is passed in, image is not blurred.
      * It finds out what is the current activity of the current application thats running. 
      * Gets its root view and creates a bitmap i.e. screenshot of the visible window of the application
      * It then calls blurRenderScript method to blur the image in-memory.
      * Once blurred image is ready based on the blurRadius, its then compressed
-     * Compressed image is converted to a base64 Image. This string is returned to the caller.
+     * Compressed image is converted to a base64 Image and resolves the caller's Promise.
      */
-    private String takeABlurredSnapshotWithWhite( double blurRadius ) {
-      String encodedImageString = "no image yet";
-      try {
-        // get root view of the activity
-          View rootView = getCurrentActivity().getWindow().getDecorView().getRootView();
+    private void takeABlurredSnapshotWithWhite(double blurRadius, Promise promise) {
+      UiThreadUtil.runOnUiThread(() -> {
+        try {
+          Activity activity = getCurrentActivity();
+          if (activity == null) {
+            promise.reject("E_NO_ACTIVITY", "No current activity is available for capture.");
+            return;
+          }
+          View rootView = activity.getWindow().getDecorView().getRootView();
+          int width = rootView.getWidth();
+          int height = rootView.getHeight();
+          if (width <= 0 || height <= 0) {
+            promise.reject("E_INVALID_VIEW_SIZE", "The current activity has no drawable area.");
+            return;
+          }
+          Bitmap bitmapOrg = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+          rootView.draw(new Canvas(bitmapOrg));
 
-          // Draw view onto software bitmap
-          Bitmap bitmapOrg = Bitmap.createBitmap(rootView.getWidth(), rootView.getHeight(), Bitmap.Config.ARGB_8888);
-          Canvas canvas = new Canvas(bitmapOrg);
-          rootView.draw(canvas);
+          getReactApplicationContext().runOnNativeModulesQueueThread(() -> {
+            try {
+              promise.resolve(encodeBlurredSnapshot(bitmapOrg, blurRadius));
+            } catch (Exception e) {
+              promise.reject("E_CAPTURE_FAILED", "Could not encode the activity capture.", e);
+            }
+          });
+        } catch (Exception e) {
+          promise.reject("E_CAPTURE_FAILED", "Could not capture the current activity.", e);
+        }
+      });
+    }
 
-          Bitmap bitmap = (blurRadius > 0)
-                  ? blurRenderScript(bitmapOrg, blurRadius)
-                  : bitmapOrg;
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        int quality = 100;
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-        encodedImageString = Base64.getEncoder().encodeToString(outputStream.toByteArray());
-        outputStream.close();
-
-      } catch (Throwable e) {
-        e.printStackTrace();
-        encodedImageString = e.toString();
+    private String encodeBlurredSnapshot(Bitmap bitmapOrg, double blurRadius) throws Exception {
+      Bitmap bitmap = (blurRadius > 0)
+              ? blurRenderScript(bitmapOrg, blurRadius)
+              : bitmapOrg;
+      try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)) {
+          throw new IllegalStateException("JPEG compression failed.");
+        }
+        return Base64.getEncoder().encodeToString(outputStream.toByteArray());
       }
-
-    return encodedImageString;
-}
+    }
 
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
@@ -203,6 +219,6 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
   }
   @ReactMethod
   public void clickclick(double white, double alpha, Promise promise) {
-    promise.resolve(takeABlurredSnapshotWithWhite( alpha ));
+    takeABlurredSnapshotWithWhite(alpha, promise);
   }
 }

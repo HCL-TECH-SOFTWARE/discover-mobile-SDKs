@@ -189,11 +189,11 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
           getReactApplicationContext().runOnNativeModulesQueueThread(() -> {
             try {
               promise.resolve(encodeBlurredSnapshot(bitmapOrg, blurRadius));
-            } catch (Exception e) {
+            } catch (Throwable e) {
               promise.reject("E_CAPTURE_FAILED", "Could not encode the activity capture.", e);
             }
           });
-        } catch (Exception e) {
+        } catch (Throwable e) {
           promise.reject("E_CAPTURE_FAILED", "Could not capture the current activity.", e);
         }
       });

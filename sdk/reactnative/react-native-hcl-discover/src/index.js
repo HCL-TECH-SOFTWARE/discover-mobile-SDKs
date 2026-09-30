@@ -243,7 +243,7 @@ var hclDiscoverLib = (function () {
                             _messages.push(clientStateMessage);
                         });
                         resolve(true);
-                    });                    
+                    }).catch(reject);
                 },500)
 
             }
@@ -332,7 +332,7 @@ var hclDiscoverLib = (function () {
                         }
                     });
                     resolve(true);
-                });
+                }).catch(reject);
             }
         });
     }    
@@ -440,7 +440,7 @@ var hclDiscoverLib = (function () {
                             touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : '';
                             _messages.push(touchEvtMessage);
                             resolve(true);
-                    });
+                    }).catch(reject);
                 }
         });
     }

@@ -36,13 +36,17 @@ More details will be added here about installation, integration.
 > 1. If you use yarn, cd to your project folder; copy and paste the following line in terminal window
 
 ```sh
-yarn add react-native-sha256 react-native-device-info react-native-hcl-discover
+yarn add react-native-sha256 react-native-hcl-discover
+
+yarn add react-native-device-info@^10.14.0
 ```
 
 > 2. Or if you use npm
 
 ```sh
-npm install react-native-sha256 react-native-device-info react-native-hcl-discover
+npm install react-native-sha256 react-native-hcl-discover
+
+npm install react-native-device-info@^10.14.0
 ```
 
 > 3. This is for MacOS/iOS only. Not needed for windows dev setup. Since npm auto linking is unreliable, do the following to install pods, just to be sure
@@ -245,8 +249,20 @@ useEffect(() => {
 } /* End of your app function */
 ```
 
-** Note : For android app - Please replace jcenter() occurrences with mavenCentral() in node_modules/react-native-sha256/android/build.gradle
-**
+## Note : 
+1. For android app - Please replace jcenter() occurrences with mavenCentral() in node_modules/react-native-sha256/android/build.gradle
+2. Add import { HCLDiscoverTextInput as TextInput } from 'react-native-hcl-discover'; wherever TextInput is used in the app
+3. Make sure to update babel.config.js contents as given below:
+   module.exports = {
+  presets: ['module:@react-native/babel-preset'],
+  plugins: [
+    require.resolve(
+      'react-native-hcl-discover/babel-plugin-hcl-discover-text-input'
+    ),
+  ],
+};
+4. Make sure to add react-native-device-info with "^10.14.0" version
+
 
 ## Contributing
 

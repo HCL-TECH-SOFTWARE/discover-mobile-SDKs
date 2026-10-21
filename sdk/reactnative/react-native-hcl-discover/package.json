@@ -1,12 +1,24 @@
 {
   "name": "react-native-hcl-discover",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Discover SDK for HCL Software",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
-  "types": "lib/typescript/src/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
+  "codegenConfig": {
+    "name": "RNHclDiscoverSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.hcldiscover"
+    },
+    "ios": {
+      "modulesProvider": {
+        "HclDiscover": "HclDiscover"
+      }
+    }
+  },
   "files": [
     "src",
     "lib",
@@ -23,7 +35,8 @@
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
-    "!**/.*"
+    "!**/.*",
+    "babel-plugin-hcl-discover-text-input.js"
   ],
   "scripts": {
     "example": "yarn workspace react-native-hcl-discover-example",
@@ -66,10 +79,9 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^28.1.1",
+    "patch-package": "^8.0.1",
     "pod-install": "^0.1.0",
     "prettier": "^2.0.5",
-    "react": "18.2.0",
-    "react-native": "0.73.2",
     "react-native-builder-bob": "^0.20.0",
     "release-it": "^15.0.0",
     "turbo": "^1.10.7",
@@ -79,8 +91,8 @@
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
+    "react": "^19.2.3",
+    "react-native": ">=0.79.0 <0.88.0"
   },
   "workspaces": [
     "example"

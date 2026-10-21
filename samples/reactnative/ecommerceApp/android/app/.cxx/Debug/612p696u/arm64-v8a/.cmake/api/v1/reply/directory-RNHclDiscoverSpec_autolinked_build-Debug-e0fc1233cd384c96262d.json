@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNHclDiscoverSpec_autolinked_build",
+		"source" : "/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/react-native-hcl-discover/android/build/generated/source/codegen/jni"
+	}
+}

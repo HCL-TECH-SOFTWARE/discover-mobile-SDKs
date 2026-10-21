@@ -245,6 +245,9 @@ useEffect(() => {
 } /* End of your app function */
 ```
 
+** Note : For android app - Please replace jcenter() occurrences with mavenCentral() in node_modules/react-native-sha256/android/build.gradle
+**
+
 ## Contributing
 
 Kindly reach out to HCL Discover SDK Team.

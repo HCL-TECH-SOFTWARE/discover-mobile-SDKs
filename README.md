@@ -9,7 +9,8 @@
 - [License](#license)
 
 ## What's New
-Resolved the issues with capturing blurred screenshots on Android.
+1. Support for new architecture - React 19
+2. Performance improvements and bug fixes
 
 ## Introduction
 
@@ -133,7 +134,12 @@ function App() {
 ```js
 /* At the beginning of your app function */
 /* Create a navigation reference; then pass it on to NavigationContainer as a ref */
-const navigationRef = React.useRef();
+	const routeNameRef = useRef<string | null>(null);
+  	const navigationRef = useRef<any>(null);
+	const getScreenName = (ref: typeof navigationRef) => {
+   	 	return ref.current?.getCurrentRoute?.()?.name;
+ 	 };
+
 /* Rest of your app variables and initializers */
 ```
 
@@ -219,7 +225,10 @@ useEffect(() => {
     /* HTML for your app function to return should resemble .. */
     /* Wrap  NavigationContainer inside HCLDiscoverReactNativeContainer and setup ref={navigationRef} */
 	return (
-		<HCLDiscoverReactNativeContainer>
+		<HCLDiscoverReactNativeContainer 
+        navigationRef={navigationRef}
+        getScreenName={getScreenName}
+        >
 		<NavigationContainer ref={navigationRef} >
 			<Stack.Navigator>
 				{your application screens here - refer to "@react-navigation/native" documentation}

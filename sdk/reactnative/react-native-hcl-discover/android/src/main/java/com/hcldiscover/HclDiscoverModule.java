@@ -149,6 +149,23 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
         return result;
     }
 
+//Method for resizing bitmap
+    private Bitmap resizeBitmap(Bitmap original, int percent) {
+        if (percent <= 0 || percent > 100) {
+            percent = 100;
+        }
+
+        int newWidth = Math.max(1, original.getWidth() * percent / 100);
+        int newHeight = Math.max(1, original.getHeight() * percent / 100);
+
+        return Bitmap.createScaledBitmap(
+            original,
+            newWidth,
+            newHeight,
+            true
+        );
+    }
+
     /**
      * 
      * @param blurRadius
@@ -168,29 +185,74 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
      */
     private String takeABlurredSnapshotWithWhite( double blurRadius ) {
       String encodedImageString = "no image yet";
-      try {
-        // get root view of the activity
-          View rootView = getCurrentActivity().getWindow().getDecorView().getRootView();
 
-          // Draw view onto software bitmap
-          Bitmap bitmapOrg = Bitmap.createBitmap(rootView.getWidth(), rootView.getHeight(), Bitmap.Config.ARGB_8888);
-          Canvas canvas = new Canvas(bitmapOrg);
-          rootView.draw(canvas);
+    try {
+        View rootView = getCurrentActivity()
+                .getWindow()
+                .getDecorView()
+                .getRootView();
 
-          Bitmap bitmap = (blurRadius > 0)
-                  ? blurRenderScript(bitmapOrg, blurRadius)
-                  : bitmapOrg;
+        // Capture screenshot at the original resolution
+        Bitmap originalBitmap = Bitmap.createBitmap(
+                rootView.getWidth(),
+                rootView.getHeight(),
+                Bitmap.Config.ARGB_8888
+        );
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        int quality = 100;
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-        encodedImageString = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+        Canvas canvas = new Canvas(originalBitmap);
+        rootView.draw(canvas);
+
+        // Set screenshot resolution percentage here
+        int percentOfScreenshotSize = 50;
+
+        // Resize before blurring
+        Bitmap resizedBitmap = resizeBitmap(
+                originalBitmap,
+                percentOfScreenshotSize
+        );
+
+        // Blur the resized screenshot
+        Bitmap bitmap = (blurRadius > 0)
+                ? blurRenderScript(resizedBitmap, blurRadius)
+                : resizedBitmap;
+
+        // Compress to JPEG
+        ByteArrayOutputStream outputStream =
+                new ByteArrayOutputStream();
+
+        int quality = 20;
+
+        bitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                quality,
+                outputStream
+        );
+
+        encodedImageString = Base64.getEncoder()
+                .encodeToString(outputStream.toByteArray());
+
         outputStream.close();
 
-      } catch (Throwable e) {
+        // Log dimensions for verification
+        android.util.Log.d(
+                "DiscoverScreenshot",
+                "Original: " + originalBitmap.getWidth() + "x"
+                + originalBitmap.getHeight()
+                + ", Resized: " + resizedBitmap.getWidth() + "x"
+                + resizedBitmap.getHeight()
+        );
+
+        // Release intermediate bitmaps
+        if (bitmap != resizedBitmap) {
+            bitmap.recycle();
+        }
+        resizedBitmap.recycle();
+        originalBitmap.recycle();
+
+    } catch (Throwable e) {
         e.printStackTrace();
         encodedImageString = e.toString();
-      }
+    }
 
     return encodedImageString;
 }

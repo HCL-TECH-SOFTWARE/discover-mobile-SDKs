@@ -17,6 +17,10 @@ limitations under the License.
 */
 
 #import "HclDiscover.h"
+#import "RNHclDiscoverSpecJSI.h"
+#import <React/RCTBridgeModule.h>
+#import <ReactCommon/RCTTurboModule.h>
+#import <memory>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
@@ -24,18 +28,94 @@ limitations under the License.
 #import "UIImageEffects.h"
 
 @implementation HclDiscover
-RCT_EXPORT_MODULE()
 
-// Example method
-// See // https://reactnative.dev/docs/native-modules-ios
-RCT_EXPORT_METHOD(multiply:(double)a
-                  b:(double)b
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_MODULE(HclDiscover)
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeHclDiscoverSpecJSI>(params);
+}
+#endif
+
+// #ifndef RCT_NEW_ARCH_ENABLED
+// // Example method
+// // See // https://reactnative.dev/docs/native-modules-ios
+// RCT_EXPORT_METHOD(multiply:(double)a
+//                   b:(double)b
+//                   resolve:(RCTPromiseResolveBlock)resolve
+//                   reject:(RCTPromiseRejectBlock)reject)
+// {
+//     NSNumber *result = @(a * b);
+
+//     resolve(result);
+// }
+
+// RCT_REMAP_METHOD(clickclick,
+//                  white:(double)white
+//                  alpha:(double)alpha
+//                  withResolver:(RCTPromiseResolveBlock)resolve
+//                  withRejecter:(RCTPromiseRejectBlock)reject)
+// {
+//     @try {
+//         NSString *base64Data =
+//             [HclDiscover takeABlurredSnapshotWithWhite:white
+//                                              andAlpha:alpha];
+
+//         if (base64Data == nil) {
+//             reject(@"SNAPSHOT_ERROR",
+//                    @"Unable to generate snapshot data.",
+//                    nil);
+//             return;
+//         }
+
+//         resolve(base64Data);
+//     }
+//     @catch (NSException *exception) {
+//         reject(@"SNAPSHOT_EXCEPTION",
+//                exception.reason ?: @"Snapshot generation failed.",
+//                nil);
+//     }
+// }
+// #endif
+
+- (void)multiply:(double)a
+               b:(double)b
+         resolve:(RCTPromiseResolveBlock)resolve
+          reject:(RCTPromiseRejectBlock)reject
 {
     NSNumber *result = @(a * b);
-
     resolve(result);
+}
+
+- (void)clickclick:(double)white
+             alpha:(double)alpha
+           resolve:(RCTPromiseResolveBlock)resolve
+            reject:(RCTPromiseRejectBlock)reject
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+        @try {
+            NSString *base64Data =
+                [HclDiscover takeABlurredSnapshotWithWhite:white
+                                                andAlpha:alpha];
+            if (base64Data == nil) {
+                reject(@"SNAPSHOT_ERROR",
+                    @"Unable to generate snapshot data.",
+                    nil);
+                return;
+            }
+
+            resolve(base64Data);
+        }
+        @catch (NSException *exception) {
+            reject(@"SNAPSHOT_EXCEPTION",
+                exception.reason ?: @"Snapshot generation failed.",
+                nil);
+        }
+    });
+
 }
 
 +(UIImage*)scaleImage:(UIImage*)theImage toSize:(CGSize)theSize
@@ -158,7 +238,7 @@ RCT_EXPORT_METHOD(multiply:(double)a
 
     return retVal;
 }
-+(NSString*)takeABlurredSnapshotWithWhite:(double)white andAlpha:(double)alpha;
++(NSString*)takeABlurredSnapshotWithWhite:(double)white andAlpha:(double)alpha
 {
     NSString *imageHash = nil;
 
@@ -200,14 +280,5 @@ RCT_EXPORT_METHOD(multiply:(double)a
     return imageHash;
 }
 
-RCT_REMAP_METHOD(clickclick,
-                 white:(double)white
-                 alpha:(double)alpha
-                 withResolver:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
-{
-    NSString* base64Data = [HclDiscover takeABlurredSnapshotWithWhite:white andAlpha:alpha];//@"I am base 64 data from iOS";
-    resolve(base64Data);
-}
 
 @end

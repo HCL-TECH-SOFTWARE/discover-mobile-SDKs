@@ -1,0 +1,15 @@
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/CMakeFiles/appmodules.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/CMakeFiles/edit_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/CMakeFiles/rebuild_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnpicker_autolinked_build/CMakeFiles/react_codegen_rnpicker.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnpicker_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnpicker_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/RNHclDiscoverSpec_autolinked_build/CMakeFiles/react_codegen_RNHclDiscoverSpec.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/RNHclDiscoverSpec_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/RNHclDiscoverSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/android/app/.cxx/Debug/612p696u/x86/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir

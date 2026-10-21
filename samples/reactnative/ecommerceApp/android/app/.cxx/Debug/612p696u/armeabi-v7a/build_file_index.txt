@@ -1,0 +1,5 @@
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/react-native-hcl-discover/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt
+/Users/sachithrao/1Projects/Projects/HCL_Discover_Mobile/reactnative/samples/reactnative/ecommerceApp/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt

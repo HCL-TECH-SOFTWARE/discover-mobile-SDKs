@@ -61,7 +61,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# JavaScript dependencies
+node_modules/
+
+# Android generated files
+**/android/.gradle/
+**/android/build/
+**/android/app/build/
+**/android/app/.cxx/
+**/android/local.properties
+
+# Android generated packages
+*.apk
+*.aab
+
 dist
 dist-ssr
 *.local

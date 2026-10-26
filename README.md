@@ -10,7 +10,10 @@
 
 ## What's New
 1. Support for new architecture - React 19
-2. Performance improvements and bug fixes
+2. Performance improvements - handled data sync/flush queue failure scenarios
+3. Compression and resolution issues related to android screenshots
+4. Handled queuing of screenshots issues for pre login screens (no session id scenarios)
+5. Introduced capped blur values(iOS - max blur value as 20 and android - max blur value as 25) to ensure more consistent and predictable behavior across platforms
 
 ## Introduction
 

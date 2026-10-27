@@ -254,7 +254,7 @@ useEffect(() => {
 
 ## Note : 
 1. For android app - Please replace jcenter() occurrences with mavenCentral() in node_modules/react-native-sha256/android/build.gradle
-2. Add import { HCLDiscoverTextInput as TextInput } from 'react-native-hcl-discover'; wherever TextInput is used in the app
+2. Add import { HCLDiscoverTextInput as TextInput } from 'react-native-hcl-discover'; wherever TextInput is used in the app to log user entered text as type 4 messages
 3. Make sure to update babel.config.js contents as given below:
    module.exports = {
   presets: ['module:@react-native/babel-preset'],

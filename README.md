@@ -266,8 +266,8 @@ useEffect(() => {
 };
 4. Make sure to add react-native-device-info with "^10.14.0" version
 5. Types 1,2,4 and 11 are auto instrumented messages for device state, screen load, user entered text and gestures.
-6. Call logEvent() method to log custom events as Type 5 messages
-7. Call logTextChange(textValue,currentRegexValue,targetId) method to log Type 4 messages manually
+6. Call logEvent() method to log custom events like button clicks and other custom messages as Type 5 - Ex: logEvent('Submit')
+7. Call logTextChange(textValue,currentRegexValue,targetId) method to log Type 4 messages manually - Ex: logTextChange('Hello','',123)
 
 
 ## Contributing

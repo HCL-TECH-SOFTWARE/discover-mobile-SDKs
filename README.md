@@ -268,6 +268,7 @@ useEffect(() => {
 5. Types 1,2,4 and 11 are auto instrumented messages for device state, screen load, user entered text and gestures.
 6. Call logEvent() method to log custom events like button clicks and other custom messages as Type 5 - Ex: logEvent('Submit')
 7. Call logTextChange(textValue,currentRegexValue,targetId) method to log Type 4 messages manually - Ex: logTextChange('Hello','',123)
+8. Call logException(exceptionData) method to log exceptions and errors as Type 6 messages
 
 
 ## Contributing

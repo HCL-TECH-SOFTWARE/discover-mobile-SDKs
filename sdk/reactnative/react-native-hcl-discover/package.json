@@ -1,6 +1,6 @@
 {
   "name": "react-native-hcl-discover",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "Discover SDK for HCL Software",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -36,7 +36,8 @@
     "!**/__fixtures__",
     "!**/__mocks__",
     "!**/.*",
-    "babel-plugin-hcl-discover-text-input.js"
+    "babel-plugin-hcl-discover-text-input.js",
+    "babel-plugin-hcl-discover-click.js"
   ],
   "scripts": {
     "example": "yarn workspace react-native-hcl-discover-example",

@@ -24,7 +24,7 @@ import DeviceInfo from 'react-native-device-info';
 import { sha256 } from 'react-native-sha256';
 import { DiscoverTextInputContext } from './DiscoverTextInputContext';
 
-const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.28';
+const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.29';
 
 const LINKING_ERROR =
   `The package 'react-native-hcl-discover' doesn't seem to be linked. Make sure: \n\n` +
@@ -61,8 +61,10 @@ var hclDiscoverLib = (function () {
     var _currentScreenName = '';
     var _defaultScreen = {
         pause: false,
-        takeScreenShot: true,
+        takeScreenShot: false,
         blurScreenShot: 0,
+        enableScreenshotForTypes4And11: false,
+        buttonTextLabelSource: 1
     };
     var _messageVersion = '10.0.0';
     var _deviceLocale = '';
@@ -108,14 +110,11 @@ var hclDiscoverLib = (function () {
                             _regexList = (options && options.regexList) ? options.regexList : _regexList;
                             _screens = (options && options.screens) ? options.screens : _screens;
         
-                            if( _screens && Object.keys(_screens).length == 0 ){
-                            _hclDiscoverLib?.debugLog('There are No screens defined, will start flush timer');
+                            _hclDiscoverLib?.debugLog('Flush timer started to upload data');
+
                             _flushQueueTimerInterval = options.flushQueueTimerInterval? options.flushQueueTimerInterval : 7000;
                             if( _flushQueueTimerInterval < 7000 ){
                                 _flushQueueTimerInterval = 7000;
-                            }
-                            }else{
-                            _hclDiscoverLib?.debugLog('There are screens defined, will not start flush timer');
                             }
                             
                             _hclDiscoverLib?.debugLog( 'starting session with sessionId : ', value, ' and _screens ', _screens );
@@ -137,6 +136,8 @@ var hclDiscoverLib = (function () {
                             }
                             // Register the AppState listener once during SDK initialization.
                             registerAppStateListener();
+                            //initialize click tracker
+                            initializeClickTracking();
                             _hclDiscoverLib?.debugLog(
                                 'Discover AppState listener registered successfully.'
                             );
@@ -147,6 +148,15 @@ var hclDiscoverLib = (function () {
                     }
                 }); */
             });
+    }
+
+    //Reset _defaultScreen params
+    _hclDiscoverLib.resetDefaultScreenParams = async (pause,takeScreenShot,blurScreenShot,enableScreenshotForTypes4And11,buttonTextLabelSource) => {
+        _defaultScreen.pause = pause;
+        _defaultScreen.takeScreenShot = takeScreenShot;
+        _defaultScreen.blurScreenShot = blurScreenShot;
+        _defaultScreen.enableScreenshotForTypes4And11 = enableScreenshotForTypes4And11;
+        _defaultScreen.buttonTextLabelSource = buttonTextLabelSource;
     }
 
     _hclDiscoverLib.stop = async () => {
@@ -332,7 +342,8 @@ var hclDiscoverLib = (function () {
                             type: 'textChange'
                         },
                         image:{
-                            base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : ''
+                            base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot && 
+                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image : ''
                         }
                     });
                     resolve(true);
@@ -409,6 +420,50 @@ var hclDiscoverLib = (function () {
         });
     }
 
+    /* type 4 : track click events automatically*/
+    _hclDiscoverLib.logClick = async (buttonText, details = {}) => {
+        return new Promise(async (resolve, reject) => {
+
+            if (_sessionId == undefined || _sessionId.length <= 0) {
+                _hclDiscoverLib?.debugLog('Discover not initialized');
+                reject(false);
+                return;
+            }
+
+            var currentScreenConfigs = _defaultScreen;
+            if (_screens && _screens[_currentScreenName]) {
+                currentScreenConfigs = _screens[_currentScreenName];
+            }
+
+            if (currentScreenConfigs.pause == true) {
+                _hclDiscoverLib?.debugLog('Discover is paused');
+                reject(false);
+                return;
+            }
+
+            if ((_sessionId != undefined) && (_sessionId.length > 0) && (currentScreenConfigs.pause == false)) {
+                const evt = {
+                    eventType: 'Click',
+                    eventName: 'ButtonClick',
+                    buttonText: (currentScreenConfigs.buttonTextLabelSource == 2 ? details.testID || '' : buttonText || ''),
+                    accessibilityLabel: (currentScreenConfigs.buttonTextLabelSource == 2 ? '' : details.accessibilityLabel || ''),
+                    accessibilityRole: details.accessibilityRole || 'button',
+                    componentType: details.componentType || '',
+                    screenName: _currentScreenName || ''
+                };
+
+                _messages.push({
+                    type: 4,
+                    offset: offset(),
+                    screenviewOffset: screenviewOffset(),
+                    clickEvent: evt
+                });
+
+                resolve(true);
+            }
+        });
+    };
+
     /* type 6 : exception */
     _hclDiscoverLib.logException = async (exceptionData:{}) => {
         return new Promise( async (resolve, reject) => {
@@ -441,7 +496,7 @@ var hclDiscoverLib = (function () {
     }
 
     /* type 11 : gesture */
-    _hclDiscoverLib.logTouch = async (evt) => {
+    _hclDiscoverLib.logTouch = async (gesture,details,evt) => {
         return new Promise( async (resolve, reject) => {
             if( _sessionId == undefined || _sessionId.length <= 0 ){
                 _hclDiscoverLib?.debugLog('Discover not initialized');
@@ -466,45 +521,32 @@ var hclDiscoverLib = (function () {
                     `Type 11 : Touch : ` +
                     `pageX=${nativeEvent?.pageX ?? 'N/A'}, ` +
                     `pageY=${nativeEvent?.pageY ?? 'N/A'}, ` +
-                    `x=${nativeEvent?.locationX ?? 'N/A'}, ` +
-                    `y=${nativeEvent?.locationY ?? 'N/A'}, ` +
                     `target=${target ?? 'N/A'}, ` +
-                    `timeStamp=${evt?.timeStamp ?? 'N/A'}, ` +
-                    `targetClass=${evt?.target?.viewConfig?.uiViewClassName ?? 'N/A'}, ` +
-                    `nodeHandle=${typeof target === 'number' ? target : 'N/A'}, ` +
-                    `touchId=${nativeEvent?.identifier ?? 'N/A'}`
+                    `timeStamp=${nativeEvent.timestamp ?? 'N/A'}, `
                     );
                     
-                    var touchEventIdString = 'tap';
-                    // if( Platform.OS === 'android'){
-                    //     touchEventIdString = (evt?.nativeEvent?.identifier == 0) ? 'tap' : 'pinch';
-                    // }else{
-                    //     touchEventIdString = (evt?.nativeEvent?.identifier == 1) ? 'tap' : 'pinch';
-                    // }
-
+                    var gestureString = gesture;
+                    var gestureDetails = `${details ? `${details}` : ''}`;
+                 
                     var touchEvtMessage = {
                         type: 11,
                         offset: offset(),
                         screenviewOffset: screenviewOffset(),
                         event:{
-                            type: evt?.nativeEvent?.identifier,
-                            tlEvent: touchEventIdString,
+                            tlEvent: gestureString,
+                            tlEventDetails: gestureDetails
                         },
                         touches:[
                             {
                                 position:{
-                                    x: evt?.nativeEvent?.locationX,
-                                    y: evt?.nativeEvent?.locationY,
-                                    pageX: evt?.nativeEvent?.pageX,
-                                    pageY: evt?.nativeEvent?.pageY
+                                    pageX: nativeEvent?.pageX,
+                                    pageY: nativeEvent?.pageY
                                 },
                                 control:{
-                                    id: findNodeHandle(evt?.nativeEvent?.target),
-                                    type: evt?.target?.viewConfig?.uiViewClassName
+                                    id: findNodeHandle(target),
                                 }
                             }
                         ],
-                        //nativeTouches: evt?.nativeEvent?.touches
                         image:{
                             base64Image:'',
                         }
@@ -517,7 +559,8 @@ var hclDiscoverLib = (function () {
                         blurLevel = Math.min(blurLevel * 4, 25);
                     }
                     clickclick(1.0, blurLevel).then( (base64Image) => {
-                            touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : '';
+                            touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot && 
+                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image : '';
                             _messages.push(touchEvtMessage);
                             resolve(true);
                     });
@@ -538,6 +581,41 @@ var hclDiscoverLib = (function () {
         settings?.AppleLanguages?.[0] ??
         'en_US'
         );
+    };
+
+    //Track button clicks automatically - Type 4
+    const initializeClickTracking = () => {
+        globalThis.__HCL_DISCOVER_TRACK_CLICK__ = (metadata) => {
+            try {
+                let buttonText =
+                    metadata.buttonText ||
+                    metadata.accessibilityLabel ||
+                    '';
+
+                if(buttonText == '[object Object]') {
+                    buttonText = '';
+                }
+
+                if(buttonText == '' && metadata.accessibilityLabel == '' && metadata.testID == '') {
+                    return;
+                }
+
+                hclDiscoverReactNative.logClick(buttonText, {
+                    accessibilityLabel: metadata.accessibilityLabel || '',
+                    accessibilityRole: metadata.accessibilityRole || 'button',
+                    componentType: metadata.componentType || '',
+                    testID: metadata.testID || ''
+                }).catch((error) => {
+                    hclDiscoverReactNative?.debugLog(
+                        `Click tracking - logClick rejected: ${String(error)}`
+                    );
+                });
+            } catch (error) {
+                hclDiscoverReactNative?.debugLog(
+                    `Click tracking failed: ${String(error)}`
+                );
+            }
+        };
     };
 
     //To flush the data when the app goes to background
@@ -849,11 +927,6 @@ export const HCLDiscoverReactNativeContainer = (props) => {
 
                 discoverTextTargetTracker.current =
                     evt.nativeEvent.target ?? null;
-
-                hclDiscoverReactNative?.debugLog(
-                    `Text updated; length=${discoverTextTracker.current.length}, ` +
-                    `target=${String(discoverTextTargetTracker.current)}`
-                );
             }
 
             // Log the final text when editing ends.
@@ -865,9 +938,10 @@ export const HCLDiscoverReactNativeContainer = (props) => {
                     const { textValue, currentRegex } = hclDiscoverReactNative
                         ?.getMaskedText(text);
 
-                    if(textInput) {
-                        textInput.setNativeProps({ text: textValue });
-                    }
+                    //Removed masking of the text in the UI
+                    // if(textInput) {
+                    //     textInput.setNativeProps({ text: textValue });
+                    // }
                     hclDiscoverReactNative
                         ?.logTextChange(textValue, currentRegex,target)
                         .catch((error) => {
@@ -960,42 +1034,300 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         };
     }, [navigationRef]);
 
-    //Handling Type : 11 - gestures
-    const onStartShouldSetResponderCapture = useCallback((event) => {
-        // Log the touch event to the Discover SDK.
-        hclDiscoverReactNative.logTouch(event).catch((error) => {
-            hclDiscoverReactNative?.debugLog(`logTouch failed: ${String(error)}`);
+    type TouchPoint = {
+        pageX: number;
+        pageY: number;
+        timestamp: number;
+    };
+
+    type TouchStart = TouchPoint & {
+        maxDistance: number;
+    };
+
+    const TAP_MAX_DURATION = 250;
+    const LONG_PRESS_DURATION = 500;
+    const MOVEMENT_THRESHOLD = 10;
+    const SWIPE_THRESHOLD = 50;
+    const PINCH_THRESHOLD = 10;
+
+    const DOUBLE_TAP_INTERVAL = 300;
+
+    const RAGE_TAP_WINDOW = 1000;
+    const RAGE_TAP_DISTANCE = 40;
+    const RAGE_TAP_COUNT = 3;
+
+    const tapTimerRef = useRef(null);
+    const tapHistoryRef = useRef([]);
+    const rageTapReportedRef = useRef(false);
+    const activeTouches = useRef(new Map());
+
+    const pinchStartDistance = useRef(null);
+    const pinchRecognized = useRef(false);
+    const gestureInProgress = useRef(false);
+
+    const logGesture = useCallback(
+    (gesture: string, details = '', event: GestureResponderEvent) => {
+        hclDiscoverReactNative?.debugLog(
+        `Gesture: ${gesture}${details ? ` | ${details}` : ''}`
+        );
+        hclDiscoverReactNative.logTouch(gesture,details,event).catch((error) => {
+        hclDiscoverReactNative?.debugLog(
+            `logTouch failed: ${String(error)}`
+        );
         });
+    },
+    [hclDiscoverReactNative]
+    );
 
-        // Safely retrieve the native event target.
-        const target = event?.nativeEvent?.target;
+    const getDistance = (
+    a: TouchPoint,
+    b: TouchPoint
+    ) => {
+    const dx = a.pageX - b.pageX;
+    const dy = a.pageY - b.pageY;
 
-        // Log the native view class when available.
-        const viewConfig = event?.target?.viewConfig;
-        const uiViewClassName = viewConfig?.uiViewClassName;
+    return Math.sqrt(dx * dx + dy * dy);
+    };
 
-        if (uiViewClassName) {
-            hclDiscoverReactNative?.debugLog(uiViewClassName);
+    useEffect(() => {
+        return () => {
+            if (tapTimerRef.current) {
+                clearTimeout(tapTimerRef.current);
+            }
+        };
+    }, []);
+
+    const recognizeTap = useCallback(
+        (event, touch) => {
+            const now = Date.now();
+
+            // Extract event information immediately
+            const eventData = {
+                nativeEvent: {
+                    pageX: touch.pageX,
+                    pageY: touch.pageY,
+                    timestamp: now,
+                    target: event?.nativeEvent?.target,
+                },
+            };
+            const currentTap = {
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                time: now,
+                event: eventData,
+            };
+
+            const recentTaps = tapHistoryRef.current.filter(
+                (tap) =>
+                    now - tap.time <= RAGE_TAP_WINDOW &&
+                    getDistance(tap, currentTap) <= RAGE_TAP_DISTANCE
+            );
+
+            recentTaps.push(currentTap);
+            tapHistoryRef.current = recentTaps;
+
+            const tapCount = recentTaps.length;
+
+            // Cancel pending single/double tap recognition
+            if (tapTimerRef.current) {
+                clearTimeout(tapTimerRef.current);
+                tapTimerRef.current = null;
+            }
+
+            // Single tap: wait to see whether another tap follows
+            if (tapCount === 1) {
+                tapTimerRef.current = setTimeout(() => {
+                    if (tapHistoryRef.current.length === 1) {
+                        logGesture('tap', '', currentTap.event);
+                    }
+
+                    tapHistoryRef.current = [];
+                    tapTimerRef.current = null;
+                    rageTapReportedRef.current = false;
+                }, DOUBLE_TAP_INTERVAL);
+
+                return;
+            }
+
+            // Double tap: wait to see whether a third tap follows
+            if (tapCount === 2) {
+                tapTimerRef.current = setTimeout(() => {
+                    if (tapHistoryRef.current.length === 2) {
+                        logGesture('doubleTap', '', currentTap.event);
+                    }
+
+                    tapHistoryRef.current = [];
+                    tapTimerRef.current = null;
+                    rageTapReportedRef.current = false;
+                }, DOUBLE_TAP_INTERVAL);
+
+                return;
+            }
+
+            // Three or more taps: RageTap only
+            if (tapCount >= RAGE_TAP_COUNT) {
+                if (!rageTapReportedRef.current) {
+                    logGesture('rageTap', `${tapCount} rapid taps`, currentTap.event);
+                    rageTapReportedRef.current = true;
+                }
+
+                if (tapTimerRef.current) {
+                    clearTimeout(tapTimerRef.current);
+                    tapTimerRef.current = null;
+                }
+            }
+        },
+        [logGesture]
+    );
+
+    const onTouchStart = useCallback(
+    (event: GestureResponderEvent) => {
+
+        const { touches, changedTouches } = event.nativeEvent;
+
+        for (const touch of changedTouches) {
+        activeTouches.current.set(touch.identifier, {
+            pageX: touch.pageX,
+            pageY: touch.pageY,
+            timestamp: touch.timestamp,
+            maxDistance: 0,
+        });
         }
 
-        // Log the native node handle.
-        const nodeHandle =
-            target != null ? findNodeHandle(target) : null;
+        if (touches.length >= 2) {
+        const distance = getDistance(touches[0], touches[1]);
 
-        hclDiscoverReactNative?.debugLog(
-            `node handle: ${nodeHandle ?? 'unavailable'}`
+        pinchStartDistance.current = distance;
+        pinchRecognized.current = false;
+        gestureInProgress.current = true;
+        } else if (touches.length === 1) {
+        gestureInProgress.current = false;
+        }
+    },
+    [hclDiscoverReactNative]
+    );
+
+    const onTouchMove = useCallback(
+    (event: GestureResponderEvent) => {
+
+        const { touches, changedTouches } = event.nativeEvent;
+
+        for (const touch of changedTouches) {
+        const start = activeTouches.current.get(touch.identifier);
+
+        if (start) {
+            const distance = getDistance(start, touch);
+            start.maxDistance = Math.max(
+            start.maxDistance,
+            distance
+            );
+        }
+        }
+
+        // Recognize a two-finger pinch.
+        if (touches.length >= 2) {
+        const currentDistance = getDistance(
+            touches[0],
+            touches[1]
         );
 
-        // Notify Discover that text-change tracking may be required.
-        // deviceKeyPressHandler(
-        //     null,
-        //     'DiscoverTextChangeCompleteEvent'
-        // );
+        if (pinchStartDistance.current === null) {
+            pinchStartDistance.current = currentDistance;
+            return;
+        }
 
-        // Observe the responder event without claiming the responder.
-        return false;
+        const difference =
+            currentDistance - pinchStartDistance.current;
 
-    }, [hclDiscoverReactNative, deviceKeyPressHandler]);
+        if (
+            Math.abs(difference) >= PINCH_THRESHOLD &&
+            !pinchRecognized.current
+        ) {
+            pinchRecognized.current = true;
+
+            logGesture(
+            difference > 0 ? 'pinchOut' : 'pinchIn',
+            `distance change: ${Math.round(difference)} px`,
+            event
+            );
+        }
+        }
+    },
+    [logGesture]
+    );
+
+    const onTouchEnd = useCallback(
+    (event: GestureResponderEvent) => {
+
+        const { changedTouches, touches } = event.nativeEvent;
+
+        for (const touch of changedTouches) {
+        const start = activeTouches.current.get(touch.identifier);
+
+        if (!start) {
+            continue;
+        }
+
+        const dx = touch.pageX - start.pageX;
+        const dy = touch.pageY - start.pageY;
+        const duration = touch.timestamp - start.timestamp;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (!pinchRecognized.current) {
+            if (
+            duration >= LONG_PRESS_DURATION &&
+            distance < MOVEMENT_THRESHOLD
+            ) {
+            logGesture('longPress', `${Math.round(duration)} ms`,event);
+            } else if (
+            duration >= 0 &&
+            duration <= TAP_MAX_DURATION &&
+            distance < MOVEMENT_THRESHOLD
+            ) {
+            recognizeTap(event, touch);
+            } else if (distance >= SWIPE_THRESHOLD) {
+            const direction =
+                Math.abs(dx) > Math.abs(dy)
+                ? dx > 0
+                    ? 'right'
+                    : 'left'
+                : dy > 0
+                    ? 'down'
+                    : 'up';
+
+            logGesture('swipe', direction,event);
+            }
+        }
+
+        activeTouches.current.delete(touch.identifier);
+        }
+
+        if (touches.length < 2) {
+        pinchStartDistance.current = null;
+        }
+
+        if (touches.length === 0) {
+        activeTouches.current.clear();
+        pinchRecognized.current = false;
+        gestureInProgress.current = false;
+        pinchStartDistance.current = null;
+        }
+    },
+    [logGesture, recognizeTap]
+    );
+
+    const onTouchCancel = useCallback(
+    (event: GestureResponderEvent) => {
+
+        activeTouches.current.clear();
+        pinchStartDistance.current = null;
+        pinchRecognized.current = false;
+        gestureInProgress.current = false;
+        tapHistoryRef.current = [];
+        rageTapReportedRef.current = false;
+    },
+    [hclDiscoverReactNative]
+    );
 
     //onLayout changes Type - 10 partially implemented
     const onLayout = useCallback(() => {
@@ -1015,7 +1347,10 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     return (
         <View style={styles.HCLDiscoverReactNative_main}
             onLayout={onLayout}
-            onStartShouldSetResponderCapture={onStartShouldSetResponderCapture}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchCancel}
         >
             <DiscoverTextInputContext.Provider
                 value={deviceKeyPressHandler}

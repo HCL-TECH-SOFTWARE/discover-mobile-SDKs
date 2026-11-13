@@ -45,6 +45,7 @@ function App(): React.JSX.Element {
       
       postMessageUrl: 'http://10.115.147.14:8050/DDiscoverUIPost.php',
       //killSwitchUrl:'http://localhost:3001/killOrLive',
+      flushQueueTimerInterval: 10000,
       regexList:[
           {   regex: /(?:\d{4}[ -]?){4}/gm,
               replace:'**** **** **** ****',
@@ -80,37 +81,50 @@ function App(): React.JSX.Element {
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 5,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
           'Product':{
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 6,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
           'Cart':{
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 7,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
           'Shipping':{
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 8,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
           'Billing':{
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 9,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
           'OrderConfirmation':{
               pause: false,
               takeScreenShot: true,
               blurScreenShot: 10,
+              enableScreenshotForTypes4And11: false,
+              buttonTextLabelSource: 1
           },
       }
   };
   console.debug('Calling hclDiscoverReactNative.start', hclDiscoverReactNative.start);
   hclDiscoverReactNative.start( options ).then( (value) => {
       console.debug('the session value is', value);
+      hclDiscoverReactNative.resetDefaultScreenParams(false,false,20,false,1);
       hclDiscoverReactNative.logAppContext( routeNameRef?.current? routeNameRef?.current : 'HomeScreen', '' ).then( resolve => {}, reject => {});
   });
   })

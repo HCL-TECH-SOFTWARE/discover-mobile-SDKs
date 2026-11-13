@@ -4,5 +4,8 @@ module.exports = {
     require.resolve(
       'react-native-hcl-discover/babel-plugin-hcl-discover-text-input'
     ),
+    require.resolve(
+      'react-native-hcl-discover/babel-plugin-hcl-discover-click'
+    ),
   ],
 };

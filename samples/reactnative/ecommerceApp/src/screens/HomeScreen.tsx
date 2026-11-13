@@ -39,6 +39,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           style={styles.viewButton}
           onPress={() => handleViewProduct(item.id)}
           activeOpacity={0.7}
+          testID='VIEW_PRODUCT'
         >
           <Text style={styles.viewButtonText}>View Product</Text>
         </TouchableOpacity>

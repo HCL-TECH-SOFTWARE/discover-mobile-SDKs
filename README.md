@@ -9,11 +9,16 @@
 - [License](#license)
 
 ## What's New
-1. Support for new architecture - React 19
-2. Performance improvements - handled data sync/flush queue failure scenarios
-3. Compression and resolution issues related to android screenshots
-4. Handled queuing of screenshots issues for pre login screens (no session id scenarios)
-5. Introduced capped blur values(iOS - max blur value as 20 and android - max blur value as 25) to ensure more consistent and predictable behavior across platforms
+1. Added gestures - tap, doubleTap, rageTap, long press, swipe and pinch as type 11 messages.
+2. Button click events are automatically captured as type 4 messages.
+3. Added new param enableScreenshotForTypes4And11 to on/off screenshot for types 4 and 11.
+   By default it is set to false. Set it as true to capture screenshot for types 4 and 11.
+4. Added new param buttonTextLabelSource to select the button text for auto capture of click events as type 4 messages.
+   By default it is set to 1 to capture text from the button text. Set it as 2 to capture text from the testID param from the app.
+5. _defaultScreen params are available for customization by calling resetDefaultScreenParams(false,true,20,false,1) method of the SDK.
+   This allows user to change the default values set by the SDK.
+6. Flush timer added if there are screens in the options dictionary.
+   Timer value can be set by adding flushQueueTimerInterval to the options dict in milliseconds.
 
 ## Introduction
 
@@ -158,8 +163,8 @@ function App() {
 useEffect(() => {
   /* Initializer */
   var options = {
-    postMessageUrl: "https://slicendice.vercel.app/listener",
-    killSwitchUrl: "http://localhost:3001/killOrLive",
+    postMessageUrl: "https://posturl",
+	flushQueueTimerInterval: 10000,
     regexList: [
       {
         regex: /(?:\d{4}[ -]?){4}/gm,
@@ -192,23 +197,31 @@ useEffect(() => {
     screens: {
       Home: {
         pause: false,
-        takeScreenShot: true,
-        blurScreenShot: 0,
+		takeScreenShot: true,
+		blurScreenShot: 20,
+		enableScreenshotForTypes4And11: false,
+		buttonTextLabelSource: 1
       },
       Screen1: {
         pause: false,
-        takeScreenShot: true,
-        blurScreenShot: 0,
+		takeScreenShot: true,
+		blurScreenShot: 20,
+		enableScreenshotForTypes4And11: false,
+		buttonTextLabelSource: 1
       },
       Screen2: {
         pause: false,
-        takeScreenShot: true,
-        blurScreenShot: 5,
+		takeScreenShot: true,
+		blurScreenShot: 20,
+		enableScreenshotForTypes4And11: false,
+		buttonTextLabelSource: 1
       },
       Screen3: {
         pause: false,
-        takeScreenShot: true,
-        blurScreenShot: 0,
+		takeScreenShot: true,
+		blurScreenShot: 20,
+		enableScreenshotForTypes4And11: false,
+		buttonTextLabelSource: 1
       },
     },
   };
@@ -216,6 +229,7 @@ useEffect(() => {
     console.debug("The hcl discover session id is : ", value);
 
     /* Invoke First Screen Change event log as first screen was invoked well before HCL Discover React Native SDK booted */
+	hclDiscoverReactNative.resetDefaultScreenParams(false,true,20,false,1);
     hclDiscoverReactNative
       .logAppContext(routeNameRef?.current ? routeNameRef?.current : "Home", "")
       .then(
@@ -258,9 +272,12 @@ useEffect(() => {
 3. Make sure to update babel.config.js contents as given below:
    module.exports = {
   presets: ['module:@react-native/babel-preset'],
-  plugins: [
+    plugins: [
     require.resolve(
       'react-native-hcl-discover/babel-plugin-hcl-discover-text-input'
+    ),
+    require.resolve(
+      'react-native-hcl-discover/babel-plugin-hcl-discover-click'
     ),
   ],
 };
@@ -268,7 +285,21 @@ useEffect(() => {
 5. Types 1,2,4 and 11 are auto instrumented messages for device state, screen load, user entered text and gestures.
 6. Call logEvent() method to log custom events like button clicks and other custom messages as Type 5 - Ex: logEvent('Submit')
 7. Call logTextChange(textValue,currentRegexValue,targetId) method to log Type 4 messages manually - Ex: logTextChange('Hello','',123)
-8. Call logException(exceptionData) method to log exceptions and errors as Type 6 messages
+8. Call logException(exceptionData) method to log exceptions and errors as Type 6 messages.
+9. var _defaultScreen = {
+        pause: false,
+        takeScreenShot: false,
+        blurScreenShot: 0,
+        enableScreenshotForTypes4And11: false,
+        buttonTextLabelSource: 1
+    };
+   params are available for customization by calling hclDiscoverReactNative.resetDefaultScreenParams(false,false,20,false,1); method of the SDK.
+   This allows user to change the default values set by the SDK.
+   takeScreenShot and enableScreenshotForTypes4And11 both should be true to take screenshot for types 2, 4 and 11.
+   If only takeScreenShot is true then screenshot is taken only for type 2.
+   If takeScreenShot is false no screenshots are taken across the app.
+10. buttonTextLabelSource param is used to select the button text for auto capture of click events as type 4 messages.
+   By default it is set to 1 to capture text from the button text. Set it as 2 to capture text from the testID param from the app.
 
 
 ## Contributing

@@ -591,34 +591,52 @@ var hclDiscoverLib = (function () {
     //Track button clicks automatically - Type 4
     const initializeClickTracking = () => {
         globalThis.__HCL_DISCOVER_TRACK_CLICK__ = (metadata) => {
-            try {
-                let buttonText =
-                    metadata.buttonText ||
-                    metadata.accessibilityLabel ||
-                    '';
+            if (_sessionId == undefined || _sessionId.length <= 0) {
+                _hclDiscoverLib?.debugLog('Discover not initialized');
+                return;
+            }
 
-                if(buttonText == '[object Object]') {
-                    buttonText = '';
-                }
+            var currentScreenConfigs = _defaultScreen;
+            if (_screens && _screens[_currentScreenName]) {
+                currentScreenConfigs = _screens[_currentScreenName];
+            }
 
-                if(buttonText == '' && metadata.accessibilityLabel == '' && metadata.testID == '') {
-                    return;
-                }
+            if (currentScreenConfigs.pause == true) {
+                _hclDiscoverLib?.debugLog('Discover is paused');
+                return;
+            }
 
-                hclDiscoverReactNative.logClick(buttonText, {
-                    accessibilityLabel: metadata.accessibilityLabel || '',
-                    accessibilityRole: metadata.accessibilityRole || 'button',
-                    componentType: metadata.componentType || '',
-                    testID: metadata.testID || ''
-                }).catch((error) => {
+            if ((_sessionId != undefined) && (_sessionId.length > 0) && (currentScreenConfigs.pause == false)) {
+
+                try {
+                    let buttonText =
+                        metadata.buttonText ||
+                        metadata.accessibilityLabel ||
+                        '';
+
+                    if (buttonText == '[object Object]') {
+                        buttonText = '';
+                    }
+
+                    if (buttonText == '' && metadata.accessibilityLabel == '' && metadata.testID == '') {
+                        return;
+                    }
+
+                    hclDiscoverReactNative.logClick(buttonText, {
+                        accessibilityLabel: metadata.accessibilityLabel || '',
+                        accessibilityRole: metadata.accessibilityRole || 'button',
+                        componentType: metadata.componentType || '',
+                        testID: metadata.testID || ''
+                    }).catch((error) => {
+                        hclDiscoverReactNative?.debugLog(
+                            `Click tracking - logClick rejected: ${String(error)}`
+                        );
+                    });
+                } catch (error) {
                     hclDiscoverReactNative?.debugLog(
-                        `Click tracking - logClick rejected: ${String(error)}`
+                        `Click tracking failed: ${String(error)}`
                     );
-                });
-            } catch (error) {
-                hclDiscoverReactNative?.debugLog(
-                    `Click tracking failed: ${String(error)}`
-                );
+                }
             }
         };
     };
@@ -1019,7 +1037,10 @@ export const HCLDiscoverReactNativeContainer = (props) => {
         // Track subsequent screen changes.
         const unsubscribeState = nav.addListener(
             'state',
-            trackCurrentScreen
+            () => {
+                startNavigation();
+                trackCurrentScreen();
+            }
         );
 
         // Keep this listener only if you also need navigation options.
@@ -1061,6 +1082,9 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     const RAGE_TAP_DISTANCE = 40;
     const RAGE_TAP_COUNT = 3;
 
+    const isNavigatingRef = useRef(false);
+    const navigationTimerRef = useRef(null);
+
     const tapTimerRef = useRef(null);
     const tapHistoryRef = useRef([]);
     const rageTapReportedRef = useRef(false);
@@ -1094,16 +1118,45 @@ export const HCLDiscoverReactNativeContainer = (props) => {
     return Math.sqrt(dx * dx + dy * dy);
     };
 
+    const startNavigation = useCallback(() => {
+        isNavigatingRef.current = true;
+
+        if (tapTimerRef.current) {
+            clearTimeout(tapTimerRef.current);
+            tapTimerRef.current = null;
+        }
+
+        tapHistoryRef.current = [];
+        rageTapReportedRef.current = false;
+
+        if (navigationTimerRef.current) {
+            clearTimeout(navigationTimerRef.current);
+        }
+
+        // Fallback: resume gesture recognition after transition settling
+        navigationTimerRef.current = setTimeout(() => {
+            isNavigatingRef.current = false;
+            navigationTimerRef.current = null;
+        }, 500);
+
+    }, []);
+
     useEffect(() => {
         return () => {
             if (tapTimerRef.current) {
                 clearTimeout(tapTimerRef.current);
+            }
+            if (navigationTimerRef.current) {
+                clearTimeout(navigationTimerRef.current);
             }
         };
     }, []);
 
     const recognizeTap = useCallback(
         (event, touch) => {
+            if (isNavigatingRef.current) {
+               return;
+            }
             const now = Date.now();
 
             // Extract event information immediately

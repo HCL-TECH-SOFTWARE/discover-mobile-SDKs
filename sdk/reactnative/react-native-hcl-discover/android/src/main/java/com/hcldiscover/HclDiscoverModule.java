@@ -43,6 +43,16 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.view.View;
+
+import com.facebook.react.bridge.UiThreadUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
+import java.util.concurrent.CountDownLatch;
 
 @ReactModule(name = HclDiscoverModule.NAME)
 public class HclDiscoverModule extends ReactContextBaseJavaModule {
@@ -183,80 +193,197 @@ public class HclDiscoverModule extends ReactContextBaseJavaModule {
      * Once blurred image is ready based on the blurRadius, its then compressed
      * Compressed image is converted to a base64 Image. This string is returned to the caller.
      */
-    private String takeABlurredSnapshotWithWhite( double blurRadius ) {
-      String encodedImageString = "no image yet";
+
+ private String takeABlurredSnapshotWithWhite(double blurRadius) {
+
+    Bitmap originalBitmap = null;
+    Bitmap resizedBitmap = null;
+    Bitmap blurredBitmap = null;
 
     try {
-        View rootView = getCurrentActivity()
-                .getWindow()
-                .getDecorView()
-                .getRootView();
 
-        // Capture screenshot at the original resolution
-        Bitmap originalBitmap = Bitmap.createBitmap(
-                rootView.getWidth(),
-                rootView.getHeight(),
-                Bitmap.Config.ARGB_8888
-        );
+        final Bitmap[] capturedBitmap = new Bitmap[1];
+        final Exception[] captureError = new Exception[1];
 
-        Canvas canvas = new Canvas(originalBitmap);
-        rootView.draw(canvas);
+        CountDownLatch latch = new CountDownLatch(1);
 
-        // Set screenshot resolution percentage here
+        // 1. Capture screenshot on Android UI thread
+        UiThreadUtil.runOnUiThread(() -> {
+
+            try {
+
+                Activity activity = getCurrentActivity();
+
+                if (activity == null) {
+                    throw new Exception("Current activity is null");
+                }
+
+                View rootView = activity.getWindow()
+                        .getDecorView()
+                        .getRootView();
+
+                if (rootView.getWidth() <= 0 ||
+                    rootView.getHeight() <= 0) {
+
+                    throw new Exception(
+                            "Root view has invalid dimensions"
+                    );
+                }
+
+                Bitmap bitmap = Bitmap.createBitmap(
+                        rootView.getWidth(),
+                        rootView.getHeight(),
+                        Bitmap.Config.ARGB_8888
+                );
+
+                Canvas canvas = new Canvas(bitmap);
+
+                rootView.draw(canvas);
+
+                capturedBitmap[0] = bitmap;
+
+                android.util.Log.d(
+                        "DiscoverScreenshot",
+                        "Screenshot captured successfully"
+                );
+
+            } catch (Exception e) {
+
+                captureError[0] = e;
+
+            } finally {
+
+                latch.countDown();
+            }
+        });
+
+        // 2. Wait for screenshot capture to complete
+        latch.await();
+
+        if (captureError[0] != null) {
+            throw captureError[0];
+        }
+
+        originalBitmap = capturedBitmap[0];
+
+        if (originalBitmap == null) {
+            throw new Exception("Screenshot bitmap is null");
+        }
+
+        // 3. Resize screenshot
         int percentOfScreenshotSize = 50;
 
-        // Resize before blurring
-        Bitmap resizedBitmap = resizeBitmap(
+        resizedBitmap = resizeBitmap(
                 originalBitmap,
                 percentOfScreenshotSize
         );
 
-        // Blur the resized screenshot
-        Bitmap bitmap = (blurRadius > 0)
-                ? blurRenderScript(resizedBitmap, blurRadius)
-                : resizedBitmap;
+        if (resizedBitmap == null) {
+            throw new Exception("Screenshot resizing failed");
+        }
 
-        // Compress to JPEG
+        // 4. Blur screenshot
+        if (blurRadius > 0) {
+
+            blurredBitmap = blurRenderScript(
+                    resizedBitmap,
+                    blurRadius
+            );
+
+            if (blurredBitmap == null) {
+                throw new Exception("Screenshot blur failed");
+            }
+
+        } else {
+
+            blurredBitmap = resizedBitmap;
+        }
+
+        // 5. Compress screenshot to JPEG
         ByteArrayOutputStream outputStream =
                 new ByteArrayOutputStream();
 
-        int quality = 20;
+        byte[] imageBytes;
 
-        bitmap.compress(
-                Bitmap.CompressFormat.JPEG,
-                quality,
-                outputStream
-        );
+        try {
 
-        encodedImageString = Base64.getEncoder()
-                .encodeToString(outputStream.toByteArray());
+            boolean compressed = blurredBitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    20,
+                    outputStream
+            );
 
-        outputStream.close();
+            if (!compressed) {
+                throw new Exception("JPEG compression failed");
+            }
 
-        // Log dimensions for verification
+            imageBytes = outputStream.toByteArray();
+
+            if (imageBytes.length == 0) {
+                throw new Exception("Compressed image is empty");
+            }
+
+        } finally {
+
+            outputStream.close();
+        }
+
+        // 6. Encode successful image to Base64
+        String encodedImageString = Base64.getEncoder()
+                .encodeToString(imageBytes);
+
         android.util.Log.d(
                 "DiscoverScreenshot",
                 "Original: " + originalBitmap.getWidth() + "x"
                 + originalBitmap.getHeight()
                 + ", Resized: " + resizedBitmap.getWidth() + "x"
                 + resizedBitmap.getHeight()
+                + ", Image bytes: " + imageBytes.length
         );
 
-        // Release intermediate bitmaps
-        if (bitmap != resizedBitmap) {
-            bitmap.recycle();
+        return encodedImageString;
+
+    } catch (InterruptedException e) {
+
+        Thread.currentThread().interrupt();
+
+        android.util.Log.e(
+                "DiscoverScreenshot",
+                "Screenshot capture interrupted",
+                e
+        );
+
+        return null;
+
+    } catch (Exception e) {
+
+        android.util.Log.e(
+                "DiscoverScreenshot",
+                "Screenshot processing failed",
+                e
+        );
+
+        return null;
+
+    } finally {
+
+        // 7. Release bitmaps safely
+
+        if (blurredBitmap != null &&
+                blurredBitmap != resizedBitmap) {
+            blurredBitmap.recycle();
         }
-        resizedBitmap.recycle();
-        originalBitmap.recycle();
 
-    } catch (Throwable e) {
-        e.printStackTrace();
-        encodedImageString = e.toString();
+        if (resizedBitmap != null &&
+                resizedBitmap != originalBitmap) {
+            resizedBitmap.recycle();
+        }
+
+        if (originalBitmap != null) {
+            originalBitmap.recycle();
+        }
     }
-
-    return encodedImageString;
 }
-
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod

@@ -247,7 +247,7 @@ var hclDiscoverLib = (function () {
                                 paused:false
                             },
                             image:{
-                                base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image : ''
+                                base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot ) ? base64Image || '' : ''
                             }
                         });
                         captureClientState().then((clientStateMessage) => {
@@ -345,7 +345,7 @@ var hclDiscoverLib = (function () {
                         },
                         image:{
                             base64Image: ( currentScreenConfigs && currentScreenConfigs.takeScreenShot && 
-                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image : ''
+                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image || '' : ''
                         }
                     });
                     resolve(true);
@@ -565,7 +565,7 @@ var hclDiscoverLib = (function () {
                     }
                     clickclick(1.0, blurLevel).then( (base64Image) => {
                             touchEvtMessage.image.base64Image = ( currentScreenConfigs && currentScreenConfigs.takeScreenShot && 
-                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image : '';
+                                currentScreenConfigs.enableScreenshotForTypes4And11) ? base64Image || '' : '';
                             _messages.push(touchEvtMessage);
                             resolve(true);
                     });

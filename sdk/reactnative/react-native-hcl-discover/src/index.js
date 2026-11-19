@@ -122,7 +122,7 @@ var hclDiscoverLib = (function () {
                             _totalMemory ? _totalMemory : DeviceInfo.getTotalMemory().then( async (promiseVal) => {_totalMemory = promiseVal});
                             _totalStorage ? _totalStorage : DeviceInfo.getTotalDiskCapacity().then( async (promiseVal) => {_totalStorage = promiseVal});
                             _deviceLocale = _deviceLocale.length ? _deviceLocale : (Platform.OS === 'ios' ? getAppleLocale() //For iOS 13 and later
-                                                                                            : NativeModules.I18nManager.localeIdentifier // android
+                                                                                            : NativeModules.I18nManager.getConstants().localeIdentifier // android
                                                                     );
                             _manufacturer.length ? _manufacturer : DeviceInfo.getManufacturer().then( async (promiseVal) => {_manufacturer = promiseVal});
                             _deviceUniqueId.length ? _deviceUniqueId : DeviceInfo.getUniqueId().then( async (promiseVal) => {_deviceUniqueId = promiseVal});

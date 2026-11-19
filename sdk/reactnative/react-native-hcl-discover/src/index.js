@@ -230,7 +230,7 @@ var hclDiscoverLib = (function () {
                 }
                 _screenViewLoadTime = Date.now();
                 setTimeout(() => {
-                    var blurLevel = currentScreenConfigs?.blurScreenShot? currentScreenConfigs.blurScreenShot : _defaultScreen.blurScreenShot;
+                    var blurLevel = currentScreenConfigs.blurScreenShot;
                     if (Platform.OS === 'ios') {
                         blurLevel = Math.min(blurLevel, 20);
                     } else if (Platform.OS === 'android') {
@@ -284,6 +284,7 @@ var hclDiscoverLib = (function () {
                     type: 3,
                     offset: offset(),
                     screenviewOffset: screenviewOffset(),
+                    screenName: _currentScreenName || '',
                     connection: connectionData ? connectionData : {}
                  });
                 resolve(true);
@@ -319,7 +320,7 @@ var hclDiscoverLib = (function () {
                 
                 _hclDiscoverLib?.debugLog('Type 4 : Text Change " ' +  textValue + ' " on target " ' + targetId + ' " ');
                 
-                var blurLevel = currentScreenConfigs?.blurScreenShot? currentScreenConfigs.blurScreenShot : _defaultScreen.blurScreenShot;
+                var blurLevel = currentScreenConfigs.blurScreenShot;
                 if (Platform.OS === 'ios') {
                     blurLevel = Math.min(blurLevel, 20);
                 } else if (Platform.OS === 'android') {
@@ -330,6 +331,7 @@ var hclDiscoverLib = (function () {
                         type: 4,
                         offset: offset(),
                         screenviewOffset: screenviewOffset(),
+                        screenName: _currentScreenName || '',
                         target:{
                             id:targetId,
                             currState:{
@@ -412,6 +414,7 @@ var hclDiscoverLib = (function () {
                     type: 5,
                     offset: offset(),
                     screenviewOffset: screenviewOffset(),
+                    screenName: _currentScreenName || '',
                     customEvent: evt ? evt : { name: 'Default Custom Event', data: {} }
                 });
                 resolve(true);
@@ -487,6 +490,7 @@ var hclDiscoverLib = (function () {
                     type: 6,
                     offset: offset(),
                     screenviewOffset: screenviewOffset(),
+                    screenName: _currentScreenName || '',
                     exception: exceptionData ? exceptionData : {}
                 });
                 resolve(true);
@@ -532,6 +536,7 @@ var hclDiscoverLib = (function () {
                         type: 11,
                         offset: offset(),
                         screenviewOffset: screenviewOffset(),
+                        screenName: _currentScreenName || '',
                         event:{
                             tlEvent: gestureString,
                             tlEventDetails: gestureDetails
@@ -552,7 +557,7 @@ var hclDiscoverLib = (function () {
                         }
                     }
                     
-                    var blurLevel = currentScreenConfigs?.blurScreenShot? currentScreenConfigs.blurScreenShot : _defaultScreen.blurScreenShot;
+                    var blurLevel = currentScreenConfigs.blurScreenShot;
                     if (Platform.OS === 'ios') {
                         blurLevel = Math.min(blurLevel, 20);
                     } else if (Platform.OS === 'android') {

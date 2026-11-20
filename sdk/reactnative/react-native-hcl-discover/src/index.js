@@ -24,7 +24,7 @@ import DeviceInfo from 'react-native-device-info';
 import { sha256 } from 'react-native-sha256';
 import { DiscoverTextInputContext } from './DiscoverTextInputContext';
 
-const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.29';
+const REACT_NATIVE_HCL_DISCOVER_VERSION = '1.0.30';
 
 const LINKING_ERROR =
   `The package 'react-native-hcl-discover' doesn't seem to be linked. Make sure: \n\n` +

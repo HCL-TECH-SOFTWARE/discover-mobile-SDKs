@@ -9,16 +9,11 @@
 - [License](#license)
 
 ## What's New
-1. Added gestures - tap, doubleTap, rageTap, long press, swipe and pinch as type 11 messages.
-2. Button click events are automatically captured as type 4 messages.
-3. Added new param enableScreenshotForTypes4And11 to on/off screenshot for types 4 and 11.
-   By default it is set to false. Set it as true to capture screenshot for types 4 and 11.
-4. Added new param buttonTextLabelSource to select the button text for auto capture of click events as type 4 messages.
-   By default it is set to 1 to capture text from the button text. Set it as 2 to capture text from the testID param from the app.
-5. _defaultScreen params are available for customization by calling resetDefaultScreenParams(false,true,20,false,1) method of the SDK.
-   This allows user to change the default values set by the SDK.
-6. Flush timer added if there are screens in the options dictionary.
-   Timer value can be set by adding flushQueueTimerInterval to the options dict in milliseconds.
+
+Bug fixes and performance improvements:
+1. Automatic capture of button clicks only if session id exists.
+2. Fix for screenshot capture issues during transition or navigation of screens.
+3. Android screenshot capture improvements and bug fixes.
 
 ## Introduction
 
